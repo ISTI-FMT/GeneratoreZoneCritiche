@@ -11,3 +11,7 @@
 *.lai
 *.la
 *.a
+/GestioneAreeCritiche/GestioneAreeCritiche/obj
+/GestioneAreeCritiche/GestioneAreeCritiche/bin
+
+/GestioneAreeCritiche/*.suo
