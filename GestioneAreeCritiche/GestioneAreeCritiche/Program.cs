@@ -2,121 +2,264 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GestioneAreeCritiche
 {
     public class Program
     {
-        private const string NomeFile = "missioni.txt";
-
-        private static void Confronto(List<int> cdbA, List<int> cdbB)
+        private static void Confronto(MissioneTreno trenoA, MissioneTreno trenoB, List<AreaCriticaLineare> aree )
         {
-            for (int currentIdx = 0; currentIdx < cdbA.Count; currentIdx++)
+            List<int> cdbA = trenoA.CdbList;
+            List<int> cdbB = trenoB.CdbList;
+
+            for (int aIdx = 0; aIdx < cdbA.Count; aIdx++)
             {
-                int currentValue = cdbA[currentIdx];
+                int currentValue = cdbA[aIdx];
 
+                //cerco l'elemento corrente di A in B
                 int bIdx = cdbB.IndexOf(currentValue);
-                if (bIdx > 0)
+                while (bIdx >= 0)
                 {
-                    List<int> area = ConfrontoSingolo(cdbA, cdbB, currentIdx, bIdx);
+                    List<int> area = SequenzaMassima(cdbA, cdbB, aIdx, bIdx);
 
+                    //Il numero minimo di punti per avere un'area critica è due
                     if (area.Count > 1)
                     {
-                        string maxArea = string.Join(",", area);
-                        Console.WriteLine(maxArea);
+                        //Cerco se esiste già un'area con la stessa sequenza
+                        AreaCriticaLineare areaLineare = aree.Find(arealista => arealista.Cdb.SequenceEqual(area));
+
+                        if (areaLineare == null)
+                        {
+                            AreaCriticaLineare acl = new AreaCriticaLineare("xx", area);
+                            acl.TreniSinistra.Add(trenoA.NomeTreno);
+                            acl.TreniDestra.Add(trenoB.NomeTreno);
+                            aree.Add(acl);
+                        }
+                        else
+                        {
+                            if (!areaLineare.TreniSinistra.Contains(trenoA.NomeTreno))
+                            {
+                                areaLineare.TreniSinistra.Add(trenoA.NomeTreno);
+                            }
+                            if (!areaLineare.TreniDestra.Contains(trenoB.NomeTreno))
+                            {
+                                areaLineare.TreniDestra.Add(trenoB.NomeTreno);
+                            }
+                        }
+
+                        //Dato che ho trovato un'area comune di lunghezza maggiore a 2, 
+                        //posso proseguire dal primo cdb successivo all'area
+                        aIdx = aIdx + area.Count - 1;
+
+                        //Stampo informazioni di debug
+                        //string maxArea = string.Join(",", area);
+                        //Console.WriteLine(maxArea);
+                    }
+
+                    //Se il vettore B ha un secondo elemento che corrisponde a quello corrente di A,
+                    //sposto l'indice su quell'elemento
+                    bIdx = cdbB.IndexOf(currentValue, bIdx + 1);
+                }
+            }
+
+        }
+
+        private static void CercaSequenzeCircolari(List<MissioneTreno> missioni )
+        {
+            foreach (MissioneTreno missioneTreno in missioni)
+            {
+                for (int i = 0; i < missioneTreno.CdbList.Count; i++)
+                {
+                    int cdb = missioneTreno.CdbList[i];
+                    
+                    if (i < missioneTreno.CdbList.Count - 1)
+                    {
+                        int cdb2 = missioneTreno.CdbList[i + 1];
+
+                        List<int> visitati = new List<int>();
+                        List<MissioneTreno> missioniNuovo = missioni.ToList();
+                        missioniNuovo.Remove(missioneTreno);
+
+                        int loopDepth = RicercaLoop(missioniNuovo, missioneTreno, new[] { cdb, cdb2 }, visitati);
+                        if (loopDepth > 2 && visitati.Count > 2 && visitati[0] == visitati[visitati.Count - 1])
+                        {
+                            string visitatiStr = string.Join(",", visitati);
+                            Console.WriteLine(loopDepth + ":" + visitatiStr);
+                        }
                     }
                 }
             }
-           
         }
 
-        private static List<int> ConfrontoSingolo(List<int> cdbA, List<int> cdbB, int startA, int startB)
+        private static int RicercaLoop(List<MissioneTreno> missioni, MissioneTreno corrente, int[] valori, List<int> visitati )
+        {
+            
+            if (visitati.Contains(valori[1]))
+            {
+                visitati.AddRange(valori);
+                return 1;
+            }
+            visitati.AddRange(valori);
+            
+
+            foreach (MissioneTreno missioneTreno in missioni)
+            {
+                if (missioneTreno == corrente)
+                    continue;
+
+                int bIdx = missioneTreno.CdbList.IndexOf(valori[1]);
+                while (bIdx >= 0 && bIdx < missioneTreno.CdbList.Count - 1)
+                {
+                    List<MissioneTreno> missioniNuovo = missioni.ToList();
+                    missioniNuovo.Remove(missioneTreno);
+                    int ciclo = RicercaLoop(missioniNuovo, missioneTreno, new[] { missioneTreno.CdbList[bIdx], missioneTreno.CdbList[bIdx + 1] }, visitati);
+
+                    if (ciclo > 0)
+                    {
+                        return ciclo + 1;
+                    }
+
+                    //Se il vettore B ha un secondo elemento che corrisponde a quello corrente di A,
+                    //sposto l'indice su quell'elemento
+                    bIdx = missioneTreno.CdbList.IndexOf(valori[1], bIdx+1);
+                }
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Ritorna una lista con la sequenza massima di cdb in comune.
+        /// Cerca nella lista di cdbA a partire dalla posizione startA.
+        /// Cerca nella lista di cdbB a partire dalla posizione startB in direzione opposta.
+        /// </summary>
+        private static List<int> SequenzaMassima(List<int> cdbA, List<int> cdbB, int startA, int startB)
         {
             List<int> res = new List<int>();
 
-            int j = startB;
-            for (int i = startA; i < cdbA.Count; i++)
+            int bIdx = startB;
+            for (int aIdx = startA; aIdx < cdbA.Count; aIdx++)
             {
-                if (j < 0)
+                if (bIdx < 0)
                 {
                     break;
                 }
 
-                int valA = cdbA[i];
-                int valB = cdbB[j];
+                int valA = cdbA[aIdx];
+                int valB = cdbB[bIdx];
 
                 if (valA == valB)
                 {
                     res.Add(valA);
                 }
 
-                j--;
+                bIdx--;
             }
 
             return res;
         }
 
-        static void Main(string[] args)
+        private static List<MissioneTreno> CaricaMissioni(string nomefile)
         {
             List<MissioneTreno> missioni = new List<MissioneTreno>();
 
-            if (File.Exists(NomeFile))
+            if (!File.Exists(nomefile)) 
+                return missioni;
+
+            FileStream stream = null;
+            StreamReader sr = null;
+            try
             {
-                try
+                stream = File.Open(nomefile, FileMode.Open, FileAccess.Read);
+                sr = new StreamReader(stream);
+
+                while (!sr.EndOfStream)
                 {
-                    FileStream stream = File.Open(NomeFile, FileMode.Open, FileAccess.Read);
-                    StreamReader sr = new StreamReader(stream);
+                    string line = sr.ReadLine();
 
-                    while (!sr.EndOfStream)
+                    //Formato di una riga
+                    // nometreno = [ x,y,z ]
+                    if (!string.IsNullOrEmpty(line))
                     {
-                        string line = sr.ReadLine();
-
-                        if (!string.IsNullOrEmpty(line))
+                        string[] tokens = line.Split('=');
+                        if (tokens.Length > 1)
                         {
-                            string[] tokens = line.Split('=');
-                            if (tokens.Length > 1)
-                            {
-                                string nometreno = tokens[0].Trim();
+                            string nometreno = tokens[0].Trim();
 
-                                string cdb = tokens[1].TrimStart(new []{'[' , ' '});
-                                cdb = cdb.TrimEnd(new[] { ']', ' ' });
-                                List<string> cdbList = cdb.Split(',').ToList();
-                                List<int> cdbListInt = cdbList.ConvertAll(Convert.ToInt32);
+                            string cdb = tokens[1].TrimStart(new[] { '[', ' ' });
+                            cdb = cdb.TrimEnd(new[] { ']', ' ' });
+                            cdb = cdb.Replace(" ", "");
+                            List<string> cdbList = cdb.Split(',').ToList();
+                            List<int> cdbListInt = cdbList.ConvertAll(Convert.ToInt32);
 
-                                Console.WriteLine("Treno:" + nometreno);
-                                Console.WriteLine("Cdb:"+ cdb);
+                            missioni.Add(new MissioneTreno(nometreno, cdbListInt));
 
-                                missioni.Add(new MissioneTreno(nometreno, cdbListInt));
-                            }
+                            Console.WriteLine("{0}: {1}", nometreno, cdb);
                         }
                     }
+                }
 
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                if (sr != null)
+                {
                     sr.Close();
-                    stream.Close();
                     sr.Dispose();
+                }
+                if (stream != null)
+                {
+                    stream.Close();
                     stream.Dispose();
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-
-                for (int i = 0; i < missioni.Count; i++)
-                {
-
-                    for (int j = 0; j < missioni.Count; j++)
-                    {
-                        Console.WriteLine("Confronto:" + missioni[i].NomeTreno + " - " + missioni[j].NomeTreno);
-                        Confronto(missioni[i].CdbList, missioni[j].CdbList);
-                    }
-                }
-               
-
-                Console.WriteLine("Press any key to exit...");
-                Console.Read();
             }
+            return missioni;
+        }
+
+        static void Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Utilizzo: GestioneAreeCritiche <nomefile>");
+                return;
+            }
+
+            string nomefile = args[0];
+
+            List<MissioneTreno> missioni = CaricaMissioni(nomefile);
+            List<AreaCriticaLineare> aree = new List<AreaCriticaLineare>();
+
+            //Confronto ogni vettore con quelli successivi
+            for (int i = 0; i < missioni.Count; i++)
+            {
+                for (int j = i + 1; j < missioni.Count; j++)
+                {
+                    //Console.WriteLine("Confronto:" + missioni[i].NomeTreno + " - " + missioni[j].NomeTreno);
+                    Confronto(missioni[i], missioni[j], aree);
+                }
+            }
+
+            Console.WriteLine("-------");
+            foreach (AreaCriticaLineare areaCriticaLineare in aree)
+            {
+                string trenisx = string.Join(",", areaCriticaLineare.TreniSinistra);
+                string trenidx = string.Join(",", areaCriticaLineare.TreniDestra);
+                string cdb = string.Join(",", areaCriticaLineare.Cdb);
+
+                Console.WriteLine("{0,10} -> {1,10} <- {2,10}", trenisx, cdb, trenidx);
+            }
+
+            Console.WriteLine("-------");
+
+            CercaSequenzeCircolari(missioni);
+
+
+            Console.WriteLine("Press any key to exit...");
+            Console.Read();
+
         }
     }
 }

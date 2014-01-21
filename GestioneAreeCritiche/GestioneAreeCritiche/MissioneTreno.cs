@@ -17,5 +17,7 @@ namespace GestioneAreeCritiche
         internal string NomeTreno { get; private set; }
 
         internal List<int> CdbList { get; private set; }
+
+        internal List<int> Visitati { get; set; }
     }
 }

@@ -15,3 +15,6 @@
 /GestioneAreeCritiche/GestioneAreeCritiche/bin
 
 /GestioneAreeCritiche/*.suo
+
+/GestioneAreeCritiche/*.user
+/GestioneAreeCritiche/GestioneAreeCritiche/*.user
