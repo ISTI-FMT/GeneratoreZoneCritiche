@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace GestioneAreeCritiche
 {
@@ -76,32 +77,57 @@ namespace GestioneAreeCritiche
                     {
                         int cdb2 = missioneTreno.CdbList[i + 1];
 
-                        List<int> visitati = new List<int>();
+                        List<CdbVisitato> visitati = new List<CdbVisitato>();
                         List<MissioneTreno> missioniNuovo = missioni.ToList();
                         missioniNuovo.Remove(missioneTreno);
 
                         int loopDepth = RicercaLoop(missioniNuovo, missioneTreno, new[] { cdb, cdb2 }, visitati);
-                        if (loopDepth > 2 && visitati.Count > 2 && visitati[0] == visitati[visitati.Count - 1])
+                        if (loopDepth > 2 && visitati.Count > 2 && visitati[0].Cdb == visitati[visitati.Count - 1].Cdb)
                         {
-                            string visitatiStr = string.Join(",", visitati);
-                            Console.WriteLine(loopDepth + ":" + visitatiStr);
+                            string trenoCorrente = null;
+                            StringBuilder output = new StringBuilder();
+                            foreach (CdbVisitato cdbVisitato in visitati)
+                            {
+                                if (string.Equals(cdbVisitato.NomeTreno, trenoCorrente))
+                                {
+                                    output.Append("," + cdbVisitato.Cdb );
+                                }
+                                else
+                                {
+                                    output.Append(" " + cdbVisitato.NomeTreno + ": " + cdbVisitato.Cdb);
+                                    trenoCorrente = cdbVisitato.NomeTreno;
+                                }
+                            }
+                             Console.WriteLine(output);
+                            //string visitatiStr = string.Join(",", visitati);
+                            //Console.WriteLine(loopDepth + ":" + visitatiStr);
                         }
                     }
                 }
             }
         }
 
-        private static int RicercaLoop(List<MissioneTreno> missioni, MissioneTreno corrente, int[] valori, List<int> visitati )
+        private static int RicercaLoop(List<MissioneTreno> missioni, MissioneTreno corrente, int[] valori, List<CdbVisitato> visitati )
         {
-            
-            if (visitati.Contains(valori[1]))
-            {
-                visitati.AddRange(valori);
-                return 1;
-            }
-            visitati.AddRange(valori);
-            
+            List<CdbVisitato> visitatiCurr = new List<CdbVisitato>(); 
+            visitatiCurr.Add(new CdbVisitato {Cdb = valori[0], NomeTreno = corrente.NomeTreno});
+            visitatiCurr.Add(new CdbVisitato {Cdb = valori[1], NomeTreno = corrente.NomeTreno });
 
+            if (visitati.Any(cdbv => cdbv.Cdb == valori[1]))
+            {
+                if (visitati.Count > 4)
+                {
+                    visitati.AddRange(visitatiCurr);
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+
+            visitati.AddRange(visitatiCurr);
+            
             foreach (MissioneTreno missioneTreno in missioni)
             {
                 if (missioneTreno == corrente)
@@ -123,6 +149,11 @@ namespace GestioneAreeCritiche
                     //sposto l'indice su quell'elemento
                     bIdx = missioneTreno.CdbList.IndexOf(valori[1], bIdx+1);
                 }
+            }
+
+            foreach (CdbVisitato cdbVisitato in visitatiCurr)
+            {
+                visitati.Remove(cdbVisitato);
             }
             return 0;
         }
@@ -221,8 +252,15 @@ namespace GestioneAreeCritiche
 
         static void Main(string[] args)
         {
+            Console.WriteLine();
             if (args.Length == 0)
             {
+                Console.WriteLine("Utilizzo: GestioneAreeCritiche <nomefile>");
+                return;
+            }
+            else if (!File.Exists(args[0]))
+            {
+                Console.WriteLine("Il file " + args[0] + " non esiste");
                 Console.WriteLine("Utilizzo: GestioneAreeCritiche <nomefile>");
                 return;
             }
