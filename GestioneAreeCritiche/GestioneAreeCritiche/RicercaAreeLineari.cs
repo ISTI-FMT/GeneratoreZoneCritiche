@@ -122,6 +122,10 @@ namespace GestioneAreeCritiche
                 {
                     res.Add(valA);
                 }
+                else
+                {
+                    break;
+                }
 
                 bIdx--;
             }
