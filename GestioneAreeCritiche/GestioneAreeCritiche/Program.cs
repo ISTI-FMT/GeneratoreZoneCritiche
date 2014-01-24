@@ -75,44 +75,59 @@ namespace GestioneAreeCritiche
             if (args.Length == 0)
             {
                 Console.WriteLine("Utilizzo: GestioneAreeCritiche <nomefile>");
+                Console.WriteLine("Press any key to exit...");
+                Console.Read();
                 return;
             }
             else if (!File.Exists(args[0]))
             {
                 Console.WriteLine("Il file " + args[0] + " non esiste");
                 Console.WriteLine("Utilizzo: GestioneAreeCritiche <nomefile>");
+                Console.WriteLine("Press any key to exit...");
+                Console.Read();
                 return;
             }
 
             string nomefile = args[0];
 
             List<MissioneTreno> missioni = CaricaMissioni(nomefile);
-            List<AreaCriticaLineare> listaAree = new List<AreaCriticaLineare>();
 
-            //Confronto ogni vettore con quelli successivi
-            for (int i = 0; i < missioni.Count; i++)
+            //------- aree lineari
+            List<AreaCriticaLineare> listaAree = RicercaAreeLineari.Ricerca(missioni);
+
+            if (listaAree.Count > 0)
             {
-                for (int j = i + 1; j < missioni.Count; j++)
+                Console.WriteLine("-------");
+                Console.WriteLine("Aree Lineari:");
+
+                foreach (AreaCriticaLineare areaCriticaLineare in listaAree)
                 {
-                    //Console.WriteLine("Confronto:" + missioni[i].NomeTreno + " - " + missioni[j].NomeTreno);
-                    listaAree.AddRange(RicercaAreeLineari.Ricerca(missioni[i], missioni[j]));
+                    string trenisx = string.Join(",", areaCriticaLineare.TreniSinistra);
+                    string trenidx = string.Join(",", areaCriticaLineare.TreniDestra);
+                    string cdb = string.Join(",", areaCriticaLineare.Cdb);
+
+                    Console.WriteLine("{0,10} -> {1,10} <- {2,10}", trenisx, cdb, trenidx);
                 }
+
+                Console.WriteLine();
             }
 
-            Console.WriteLine("-------");
-            foreach (AreaCriticaLineare areaCriticaLineare in listaAree)
+            //------- aree circolari
+            List<AreaCriticaCircolare> aree = RicercaAreeCircolari.Ricerca(missioni);
+
+            if (aree.Count > 0)
             {
-                string trenisx = string.Join(",", areaCriticaLineare.TreniSinistra);
-                string trenidx = string.Join(",", areaCriticaLineare.TreniDestra);
-                string cdb = string.Join(",", areaCriticaLineare.Cdb);
+                Console.WriteLine("-------");
+                Console.WriteLine("Aree Circolari:");
 
-                Console.WriteLine("{0,10} -> {1,10} <- {2,10}", trenisx, cdb, trenidx);
+                foreach (AreaCriticaCircolare areaCriticaCircolare in aree)
+                {
+                    Console.WriteLine("{0,10} : {1,10}", string.Join(",", areaCriticaCircolare.Treni),
+                        string.Join(",", areaCriticaCircolare.ListaCdb.Distinct()));
+                }
+
+                Console.WriteLine();
             }
-
-            Console.WriteLine("-------");
-
-            RicercaAreeCircolari.Ricerca(missioni);
-
 
             Console.WriteLine("Press any key to exit...");
             Console.Read();

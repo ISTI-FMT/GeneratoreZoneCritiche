@@ -7,8 +7,9 @@ namespace GestioneAreeCritiche
 {
     internal class RicercaAreeCircolari
     {
-        internal static void Ricerca(List<MissioneTreno> missioni)
+        internal static List<AreaCriticaCircolare> Ricerca(List<MissioneTreno> missioni)
         {
+            List<AreaCriticaCircolare> aree = new List<AreaCriticaCircolare>();
             foreach (MissioneTreno missioneTreno in missioni)
             {
                 for (int i = 0; i < missioneTreno.CdbList.Count; i++)
@@ -24,29 +25,34 @@ namespace GestioneAreeCritiche
                         missioniNuovo.Remove(missioneTreno);
 
                         int loopDepth = RicercaLoop(missioniNuovo, missioneTreno, new[] { cdb, cdb2 }, visitati);
-                        if (loopDepth > 2 && visitati.Count > 2 && visitati[0].Cdb == visitati[visitati.Count - 1].Cdb)
+                        if (loopDepth > 2 && visitati.Count > 4 && visitati[0].Cdb == visitati[visitati.Count - 1].Cdb)
                         {
-                            string trenoCorrente = null;
-                            StringBuilder output = new StringBuilder();
+                            AreaCriticaCircolare circolare = new AreaCriticaCircolare();
+                            List<int> visitatiInt = visitati.Select(visitato => visitato.Cdb).ToList();
+                            circolare.ListaCdb = visitatiInt;
+
+                            AreaCriticaCircolare circolareEsistente = aree.Find(area => area.Equals(circolare));
+                            if (circolareEsistente != null)
+                            {
+                                circolare = circolareEsistente;
+                            }
+                            else
+                            {
+                                aree.Add(circolare);
+                            }
+
                             foreach (CdbVisitato cdbVisitato in visitati)
                             {
-                                if (String.Equals(cdbVisitato.NomeTreno, trenoCorrente))
+                                if (!circolare.Treni.Contains(cdbVisitato.NomeTreno))
                                 {
-                                    output.Append("," + cdbVisitato.Cdb);
-                                }
-                                else
-                                {
-                                    output.Append(" " + cdbVisitato.NomeTreno + ": " + cdbVisitato.Cdb);
-                                    trenoCorrente = cdbVisitato.NomeTreno;
+                                    circolare.Treni.Add(cdbVisitato.NomeTreno);
                                 }
                             }
-                            Console.WriteLine(output);
-                            //string visitatiStr = string.Join(",", visitati);
-                            //Console.WriteLine(loopDepth + ":" + visitatiStr);
                         }
                     }
                 }
             }
+            return aree;
         }
 
         private static int RicercaLoop(List<MissioneTreno> missioni, MissioneTreno corrente, int[] valori, List<CdbVisitato> visitati)

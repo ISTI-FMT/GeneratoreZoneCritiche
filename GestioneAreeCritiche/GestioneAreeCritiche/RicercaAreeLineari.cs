@@ -5,6 +5,19 @@ namespace GestioneAreeCritiche
 {
     internal static class RicercaAreeLineari
     {
+        internal static List<AreaCriticaLineare> Ricerca(List<MissioneTreno> missioni)
+        {
+            List<AreaCriticaLineare> listaAree = new List<AreaCriticaLineare>();
+            for (int i = 0; i < missioni.Count; i++)
+            {
+                for (int j = i + 1; j < missioni.Count; j++)
+                {
+                    //Console.WriteLine("Confronto:" + missioni[i].NomeTreno + " - " + missioni[j].NomeTreno);
+                    RicercaAreeLineari.ConfrontaTreni(missioni[i], missioni[j], listaAree);
+                }
+            }
+            return listaAree;
+        }
 
         private static void AggiungiAreaLineare(List<AreaCriticaLineare> aree, MissioneTreno trenoA, MissioneTreno trenoB, List<int> area )
         {
@@ -53,10 +66,8 @@ namespace GestioneAreeCritiche
             }
         }
 
-
-        internal static List<AreaCriticaLineare> Ricerca(MissioneTreno trenoA, MissioneTreno trenoB)
+        private static void ConfrontaTreni(MissioneTreno trenoA, MissioneTreno trenoB, List<AreaCriticaLineare> aree)
         {
-            List<AreaCriticaLineare> aree = new List<AreaCriticaLineare>();
             List<int> cdbA = trenoA.CdbList;
             List<int> cdbB = trenoB.CdbList;
 
@@ -85,7 +96,6 @@ namespace GestioneAreeCritiche
                     bIdx = cdbB.IndexOf(currentValue, bIdx + 1);
                 }
             }
-            return aree;
         }
 
         /// <summary>
