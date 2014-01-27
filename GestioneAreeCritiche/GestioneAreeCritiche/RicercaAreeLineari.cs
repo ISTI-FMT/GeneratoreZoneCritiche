@@ -12,8 +12,7 @@ namespace GestioneAreeCritiche
             {
                 for (int j = i + 1; j < missioni.Count; j++)
                 {
-                    //Console.WriteLine("Confronto:" + missioni[i].NomeTreno + " - " + missioni[j].NomeTreno);
-                    RicercaAreeLineari.ConfrontaTreni(missioni[i], missioni[j], listaAree);
+                    ConfrontaTreni(missioni[i], missioni[j], listaAree);
                 }
             }
             return listaAree;

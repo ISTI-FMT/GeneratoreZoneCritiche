@@ -12,44 +12,41 @@ namespace GestioneAreeCritiche
             List<AreaCriticaCircolare> aree = new List<AreaCriticaCircolare>();
             foreach (MissioneTreno missioneTreno in missioni)
             {
-                for (int i = 0; i < missioneTreno.CdbList.Count; i++)
+                for (int i = 0; i < missioneTreno.CdbList.Count -1 ; i++)
                 {
                     int cdb = missioneTreno.CdbList[i];
+                    int cdb2 = missioneTreno.CdbList[i + 1];
 
-                    if (i < missioneTreno.CdbList.Count - 1)
+                    List<CdbVisitato> visitati = new List<CdbVisitato>();
+                    List<MissioneTreno> missioniNuovo = missioni.ToList();
+                    missioniNuovo.Remove(missioneTreno);
+
+                    int loopDepth = RicercaLoop(missioniNuovo, missioneTreno, new[] { cdb, cdb2 }, visitati);
+                    if (loopDepth > 2 && visitati.Count > 4 && visitati[0].Cdb == visitati[visitati.Count - 1].Cdb)
                     {
-                        int cdb2 = missioneTreno.CdbList[i + 1];
+                        AreaCriticaCircolare circolare = new AreaCriticaCircolare();
+                        List<int> visitatiInt = visitati.Select(visitato => visitato.Cdb).ToList();
+                        circolare.ListaCdb = visitatiInt;
 
-                        List<CdbVisitato> visitati = new List<CdbVisitato>();
-                        List<MissioneTreno> missioniNuovo = missioni.ToList();
-                        missioniNuovo.Remove(missioneTreno);
-
-                        int loopDepth = RicercaLoop(missioniNuovo, missioneTreno, new[] { cdb, cdb2 }, visitati);
-                        if (loopDepth > 2 && visitati.Count > 4 && visitati[0].Cdb == visitati[visitati.Count - 1].Cdb)
+                        AreaCriticaCircolare circolareEsistente = aree.Find(area => area.Equals(circolare));
+                        if (circolareEsistente != null)
                         {
-                            AreaCriticaCircolare circolare = new AreaCriticaCircolare();
-                            List<int> visitatiInt = visitati.Select(visitato => visitato.Cdb).ToList();
-                            circolare.ListaCdb = visitatiInt;
+                            circolare = circolareEsistente;
+                        }
+                        else
+                        {
+                            aree.Add(circolare);
+                        }
 
-                            AreaCriticaCircolare circolareEsistente = aree.Find(area => area.Equals(circolare));
-                            if (circolareEsistente != null)
+                        foreach (CdbVisitato cdbVisitato in visitati)
+                        {
+                            if (!circolare.Treni.Contains(cdbVisitato.NomeTreno))
                             {
-                                circolare = circolareEsistente;
-                            }
-                            else
-                            {
-                                aree.Add(circolare);
-                            }
-
-                            foreach (CdbVisitato cdbVisitato in visitati)
-                            {
-                                if (!circolare.Treni.Contains(cdbVisitato.NomeTreno))
-                                {
-                                    circolare.Treni.Add(cdbVisitato.NomeTreno);
-                                }
+                                circolare.Treni.Add(cdbVisitato.NomeTreno);
                             }
                         }
                     }
+                    
                 }
             }
             return aree;
@@ -61,8 +58,11 @@ namespace GestioneAreeCritiche
             visitatiCurr.Add(new CdbVisitato { Cdb = valori[0], NomeTreno = corrente.NomeTreno });
             visitatiCurr.Add(new CdbVisitato { Cdb = valori[1], NomeTreno = corrente.NomeTreno });
 
+            //Se il secondo cdb è già nella lista dei visitati, ho trovato un loop
             if (visitati.Any(cdbv => cdbv.Cdb == valori[1]))
             {
+                //Se il loop è maggiore di 4 (ovvero 2 nodi), ritorno 1 (loop trovato)
+                //Altrimenti ritorno 0 (loop non trovato) perchè ho trovato un loop di soli 2 nodi ovvero un'area lineare
                 if (visitati.Count > 4)
                 {
                     visitati.AddRange(visitatiCurr);
@@ -81,6 +81,7 @@ namespace GestioneAreeCritiche
                 if (missioneTreno == corrente)
                     continue;
 
+                //Cerco l'elemento valori[1] nella lista di cdb di ogni treno
                 int bIdx = missioneTreno.CdbList.IndexOf(valori[1]);
                 while (bIdx >= 0 && bIdx < missioneTreno.CdbList.Count - 1)
                 {
