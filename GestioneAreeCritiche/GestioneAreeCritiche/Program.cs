@@ -69,8 +69,35 @@ namespace GestioneAreeCritiche
             return missioni;
         }
 
-        private static void GeneraMissioneAnnotata(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
+        private static void GeneraOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni, StreamWriter sw)
         {
+            Console.WriteLine("Vettore aree critiche:");
+            StringBuilder builderAree = new StringBuilder();
+            builderAree.Append('[');
+            foreach (AreaCriticaLineare areaCriticaLineare in areeLineari)
+            {
+                builderAree.Append('0');
+                builderAree.Append(',');
+            }
+            foreach (AreaCriticaCircolare areaCriticaCircolare in areeCircolari)
+            {
+                //La lista di cdb contiene cdb a coppie quindi il numero di  cdb è la sua metà
+                //esempio: 1,2,2,3,3,4,4,1 => 1,2,3,4
+                builderAree.Append((areaCriticaCircolare.ListaCdb.Count / 2) - 1);
+                builderAree.Append(',');
+            }
+            builderAree.Remove(builderAree.Length - 1, 1);
+            builderAree.Append(']');
+            Console.WriteLine(builderAree.ToString());
+
+            if (sw != null)
+            {
+                sw.WriteLine(builderAree.ToString());
+            }
+
+            Console.WriteLine();
+
+            Console.WriteLine("Vettori annotati:");
             //0 : nessuna azione
             //+ / - 1: aumenta o diminuisci contatore del numero di treni nella regione
             //+ / - 2: aumenta o diminuisci il contatore del numero di treni entrati da destra
@@ -165,7 +192,13 @@ namespace GestioneAreeCritiche
                     sb.AppendFormat(" [{0}] {1},",string.Join(",", azioni), cdb);
                 }
 
-                Console.WriteLine(sb.ToString().TrimEnd(','));
+                string vettoreOut = sb.ToString().TrimEnd(',');
+                Console.WriteLine(vettoreOut);
+
+                if (sw != null)
+                {
+                    sw.WriteLine(vettoreOut);
+                }
             }
         }
 
@@ -230,7 +263,36 @@ namespace GestioneAreeCritiche
             }
             Console.WriteLine("-------");
 
-            GeneraMissioneAnnotata(areeLineari,areeCircolari, missioni);
+            string outfile = Path.GetFileNameWithoutExtension(nomefile) + ".umc";
+            StreamWriter sw = null;
+            FileStream fs = null;
+            try
+            {
+                if (File.Exists(outfile))
+                {
+                    File.Delete(outfile);
+                }
+                fs = File.OpenWrite(outfile);
+                sw = new StreamWriter(fs);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Errore: Impossibile scrivere sul file " + outfile);
+            }
+            GeneraOutput(areeLineari, areeCircolari, missioni, sw);
+
+
+            if (sw != null)
+            {
+                sw.Flush();
+                sw.Close();
+                sw.Dispose();
+            }
+            if (fs != null)
+            {
+                fs.Close();
+                fs.Dispose();
+            }
 
 
             Console.WriteLine("Press any key to exit...");
