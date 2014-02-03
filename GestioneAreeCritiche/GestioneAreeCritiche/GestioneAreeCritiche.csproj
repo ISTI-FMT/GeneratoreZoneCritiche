@@ -46,6 +46,7 @@
     <Compile Include="AreaCriticaLineare.cs" />
     <Compile Include="CdbVisitato.cs" />
     <Compile Include="MissioneTreno.cs" />
+    <Compile Include="Output.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RicercaAreeCircolari.cs" />
