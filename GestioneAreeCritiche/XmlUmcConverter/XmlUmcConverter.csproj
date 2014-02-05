@@ -1,17 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{78DE0BFA-3826-43DE-AEA2-BE86DAD0AD7A}</ProjectGuid>
+    <ProjectGuid>{8EB05A1F-2B64-4516-A786-7BD561436A10}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GestioneAreeCritiche</RootNamespace>
-    <AssemblyName>GestioneAreeCritiche</AssemblyName>
+    <RootNamespace>XmlUmcConverter</RootNamespace>
+    <AssemblyName>XmlUmcConverter</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProductVersion>10.0.0</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -42,20 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AreaCriticaCircolare.cs" />
-    <Compile Include="AreaCriticaLineare.cs" />
-    <Compile Include="CdbVisitato.cs" />
-    <Compile Include="Output\MissioneAnnotata.cs" />
-    <Compile Include="MissioneTreno.cs" />
-    <Compile Include="Output\GenerazioneOutput.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RicercaAreeCircolari.cs" />
-    <Compile Include="RicercaAreeLineari.cs" />
-    <Compile Include="Output\StrutturaOutput.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GestioneAreeCritiche\GestioneAreeCritiche.csproj">
+      <Project>{78DE0BFA-3826-43DE-AEA2-BE86DAD0AD7A}</Project>
+      <Name>GestioneAreeCritiche</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

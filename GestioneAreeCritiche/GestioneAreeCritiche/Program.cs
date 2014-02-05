@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GestioneAreeCritiche.Output;
 
 namespace GestioneAreeCritiche
 {
@@ -77,7 +78,7 @@ namespace GestioneAreeCritiche
         //+ / - 3: aumenta o diminuisci il contatore del numero di treni entrati da sinistra
         //+ / - 4: aumenta o diminuisci il contatore del numero di treni che entrano ed escono dalla stessa direzione.
         /// </summary>
-        private static StrutturaOutput GeneraOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
+        private static StrutturaOutput GeneraStrutturaOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
         {
             StrutturaOutput res = new StrutturaOutput();
 
@@ -177,30 +178,41 @@ namespace GestioneAreeCritiche
                     missioneAnnotata.ListaCdb.Add(cdb);
                 }
             }
-            
+
             return res;
         }
 
-        static void Main(string[] args)
+        private static void PrintUsage()
         {
-            Console.WriteLine();
-            if (args.Length == 0)
-            {
-                Console.WriteLine("Utilizzo: GestioneAreeCritiche <nomefile>");
-                Console.WriteLine("Press any key to exit...");
-                Console.Read();
-                return;
-            }
-            else if (!File.Exists(args[0]))
-            {
-                Console.WriteLine("Il file " + args[0] + " non esiste");
-                Console.WriteLine("Utilizzo: GestioneAreeCritiche <nomefile>");
-                Console.WriteLine("Press any key to exit...");
-                Console.Read();
-                return;
-            }
+            Console.WriteLine("Utilizzo:");
+            Console.WriteLine("GestioneAreeCritiche <nomefile>");
+            Console.WriteLine("GestioneAreeCritiche --convert <nomefile.umc>|<nomefile.xml>");
+            Console.WriteLine("Press any key to exit...");
+            Console.Read();
+        }
 
-            string nomefile = args[0];
+        private static void Main(string[] args)
+        {
+            string nomefile = null;
+
+            Console.WriteLine();
+
+            if (args.Length == 1)
+            {
+                if (!File.Exists(args[0]))
+                {
+                    Console.WriteLine("Il file " + args[0] + " non esiste");
+                    PrintUsage();
+                    return;
+                }
+
+                nomefile = args[0];
+            }
+            else
+            {
+                PrintUsage();
+                return;
+            }
 
             List<MissioneTreno> missioni = CaricaMissioni(nomefile);
 
@@ -242,17 +254,21 @@ namespace GestioneAreeCritiche
             }
             Console.WriteLine("-------");
 
-            StrutturaOutput output = GeneraOutput(areeLineari, areeCircolari, missioni);
+            StrutturaOutput output = GeneraStrutturaOutput(areeLineari, areeCircolari, missioni);
 
+            //Scrivo l'output sulla console
+            GenerazioneOutput.ToConsoleOutput(output);
+
+            //Generazione output per UMC
             string outfile = Path.GetFileNameWithoutExtension(nomefile) + ".umc";
-            Output.GenerazioneUmc(output, outfile);
+            GenerazioneOutput.ToUmc(output, outfile);
 
+            //Generazione output XML
             outfile = Path.GetFileNameWithoutExtension(nomefile) + ".xml";
-            Output.GenerazioneXml(output, outfile);
+            GenerazioneOutput.ToXml(output, outfile);
 
             Console.WriteLine("Press any key to exit...");
             Console.Read();
-
         }
     }
 }
