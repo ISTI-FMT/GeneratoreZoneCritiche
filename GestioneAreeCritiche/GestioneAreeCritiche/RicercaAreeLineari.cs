@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using GestioneAreeCritiche.AreeCritiche;
 
 namespace GestioneAreeCritiche
 {
@@ -21,7 +22,7 @@ namespace GestioneAreeCritiche
         private static void AggiungiAreaLineare(List<AreaCriticaLineare> aree, MissioneTreno trenoA, MissioneTreno trenoB, List<int> area )
         {
             //Cerco se esiste già un'area con la stessa sequenza
-            AreaCriticaLineare areaLineare = aree.Find(arealista => arealista.Cdb.SequenceEqual(area));
+            AreaCriticaLineare areaLineare = aree.Find(arealista => arealista.ListaCdb.SequenceEqual(area));
 
             if (areaLineare == null)
             {
@@ -31,11 +32,11 @@ namespace GestioneAreeCritiche
                 List<int> areaReverse = area.ToList();
                 areaReverse.Reverse();
 
-                areaLineare = aree.Find(arealista => arealista.Cdb.SequenceEqual(areaReverse));
+                areaLineare = aree.Find(arealista => arealista.ListaCdb.SequenceEqual(areaReverse));
 
                 if (areaLineare == null)
                 {
-                    AreaCriticaLineare acl = new AreaCriticaLineare("xx", area);
+                    AreaCriticaLineare acl = new AreaCriticaLineare(area);
                     acl.TreniSinistra.Add(trenoA.NomeTreno);
                     acl.TreniDestra.Add(trenoB.NomeTreno);
                     aree.Add(acl);

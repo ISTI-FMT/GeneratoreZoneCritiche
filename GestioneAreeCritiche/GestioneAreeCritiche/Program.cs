@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using GestioneAreeCritiche.AreeCritiche;
 using GestioneAreeCritiche.Output;
 
 namespace GestioneAreeCritiche
@@ -81,17 +82,8 @@ namespace GestioneAreeCritiche
         private static StrutturaOutput GeneraStrutturaOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
         {
             StrutturaOutput res = new StrutturaOutput();
-
-            //--- vettore delle aree critiche
-            List<int> limitiAree = areeLineari.Select(areaCriticaLineare => 0).ToList();
-            foreach (AreaCriticaCircolare areaCriticaCircolare in areeCircolari)
-            {
-                //La lista di cdb contiene cdb a coppie quindi il numero di  cdb è la sua metà
-                //esempio: 1,2,2,3,3,4,4,1 => 1,2,3,4
-                limitiAree.Add((areaCriticaCircolare.ListaCdb.Count / 2) - 1);
-            }
-            res.LimitiAree = limitiAree;
-
+            res.AreeCritiche.AddRange(areeLineari);
+            res.AreeCritiche.AddRange(areeCircolari);
 
             //--- Generazione della lista di vettori annotati
             foreach (MissioneTreno missioneTreno in missioni)
@@ -120,26 +112,26 @@ namespace GestioneAreeCritiche
                         AreaCriticaLineare areaCriticaLineare = areeLineari[i];
 
                         if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.Cdb[0] == cdb)
+                            areaCriticaLineare.ListaCdb[0] == cdb)
                         {
                             //entra sinistra
                             azioni[i] = 3;
                         }
                         if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.Cdb[areaCriticaLineare.Cdb.Count - 1] == cdb)
+                            areaCriticaLineare.ListaCdb[areaCriticaLineare.ListaCdb.Count - 1] == cdb)
                         {
                             //esci sinistra
                             uscitaAree[i] = -3;
                         }
 
                         if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.Cdb[areaCriticaLineare.Cdb.Count - 1] == cdb)
+                            areaCriticaLineare.ListaCdb[areaCriticaLineare.ListaCdb.Count - 1] == cdb)
                         {
                             //entra destra
                             azioni[i] = 2;
                         }
                         if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.Cdb[0] == cdb)
+                            areaCriticaLineare.ListaCdb[0] == cdb)
                         {
                             //esci destra
                             uscitaAree[i] = -2;
@@ -228,7 +220,7 @@ namespace GestioneAreeCritiche
                 {
                     string trenisx = string.Join(",", areaCriticaLineare.TreniSinistra);
                     string trenidx = string.Join(",", areaCriticaLineare.TreniDestra);
-                    string cdb = string.Join(",", areaCriticaLineare.Cdb);
+                    string cdb = string.Join(",", areaCriticaLineare.ListaCdb);
 
                     Console.WriteLine("{0,10} -> {1,10} <- {2,10}", trenisx, cdb, trenidx);
                 }

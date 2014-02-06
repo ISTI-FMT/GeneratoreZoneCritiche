@@ -42,8 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AreaCriticaCircolare.cs" />
-    <Compile Include="AreaCriticaLineare.cs" />
+    <Compile Include="AreeCritiche\AreaCriticaCircolare.cs" />
+    <Compile Include="AreeCritiche\AreaCriticaLineare.cs" />
+    <Compile Include="AreeCritiche\IAreaCritica.cs" />
     <Compile Include="CdbVisitato.cs" />
     <Compile Include="Output\MissioneAnnotata.cs" />
     <Compile Include="MissioneTreno.cs" />

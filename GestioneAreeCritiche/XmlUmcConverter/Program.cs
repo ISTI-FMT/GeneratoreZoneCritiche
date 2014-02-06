@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
+using GestioneAreeCritiche.AreeCritiche;
 using GestioneAreeCritiche.Output;
 
 namespace XmlUmcConverter
@@ -36,7 +37,7 @@ namespace XmlUmcConverter
                     {
                         line = line.TrimStart('[');
                         line = line.TrimEnd(']');
-                        res.LimitiAree = line.Split(',').Select(limite => Convert.ToInt32(limite.Trim())).ToList();
+                      //  res.LimitiAree = line.Split(',').Select(limite => Convert.ToInt32(limite.Trim())).ToList();
                     }
                     else
                     {
@@ -108,9 +109,34 @@ namespace XmlUmcConverter
 
                 if (myReader.Name == "Area")
                 {
-                    string idStr = myReader.GetAttribute("Id");
-                    string limiteStr = myReader.GetAttribute("Limite");
-                    limiti[Convert.ToInt32(idStr)] = Convert.ToInt32(limiteStr);
+                    int id = Convert.ToInt32(myReader.GetAttribute("Id"));
+                    //NB:Nel caso di aree circolari, il limite deve essere coerente con i cdb dell'area
+                    int limite = Convert.ToInt32(myReader.GetAttribute("Limite"));
+                    limiti[id] = Convert.ToInt32(limite);
+                    
+                    List<int>listaCdb = new List<int>();
+                    XmlReader cdbReader = myReader.ReadSubtree();
+                    while ( cdbReader.Read())
+                    {
+                        if (cdbReader.NodeType == XmlNodeType.Element 
+                            && cdbReader.Name == "Cdb")
+                        {
+                            int cdbId = Convert.ToInt32(myReader.GetAttribute("Id"));
+                            listaCdb.Add(cdbId);
+                        }
+                    }
+
+                    IAreaCritica area;
+                    if (limite == 0)
+                    {
+                        area = new AreaCriticaLineare(listaCdb);
+                    }
+                    else
+                    {
+                        area = new AreaCriticaCircolare();
+                        area.ListaCdb = listaCdb;
+                    }
+                    res.AreeCritiche.Add(area);
                 }
                 else if (myReader.Name == "Missione")
                 {
@@ -150,8 +176,7 @@ namespace XmlUmcConverter
 
                     if (missioneCorrente != null)
                     {
-                        //Metto zero a tutte le aree non presenti nella lista di azioni 
-                        //(significa che nessuna azione deve essere compiuta su queste aree)
+                        //Creo, settate a zero (nessuna azione deve essere compiuta sulle aree corrispondenti), tutte le azioni che mancano
                         foreach (KeyValuePair<int, int> keyValuePair in limiti)
                         {
                             if (!azioniCdbCorrente.ContainsKey(keyValuePair.Key))
@@ -164,7 +189,6 @@ namespace XmlUmcConverter
                     }
                 }
             }
-            res.LimitiAree = limiti.Values.ToList();
             return res;
         }
 

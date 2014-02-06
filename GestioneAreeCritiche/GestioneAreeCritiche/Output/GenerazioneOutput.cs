@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Xml;
+using GestioneAreeCritiche.AreeCritiche;
 
 namespace GestioneAreeCritiche.Output
 {
@@ -47,19 +48,34 @@ namespace GestioneAreeCritiche.Output
         /// </summary>
         private static void GeneraUmc(StrutturaOutput output, TextWriter sw)
         {
-            sw.Write('[');
-            sw.Write(string.Join(",", output.LimitiAree));
-            sw.WriteLine(']');
-
+            sw.WriteLine("#Missioni:");
             foreach (MissioneAnnotata missione in output.MissioniAnnotate)
             {
-                sw.Write(missione.Trn + ":");
+                sw.Write(missione.Trn);
+                sw.Write(": ");
+                sw.WriteLine(string.Join(",", missione.ListaCdb));
+            }
+            sw.WriteLine();
+
+            sw.WriteLine("#Aree:");
+            for (int index = 0; index < output.AreeCritiche.Count; index++)
+            {
+                IAreaCritica area = output.AreeCritiche[index];
+
+                sw.WriteLine("{0}: [{1}], {2}", index, area.GetListaCdbStr(), area.Limite);
+            }
+            sw.WriteLine();
+
+            sw.WriteLine("#Constraints:");
+            foreach (MissioneAnnotata missione in output.MissioniAnnotate)
+            {
+                sw.Write(missione.Trn);
+                sw.Write(": ");
                 for (int index = 0; index < missione.ListaCdb.Count; index++)
                 {
-                    int cdb = missione.ListaCdb[index];
                     int[] azioni = missione.AzioniCdb[index];
 
-                    sw.Write(" [{0}] {1}", string.Join(",", azioni), cdb);
+                    sw.Write("[{0}]", string.Join(",", azioni));
 
                     if (index < missione.ListaCdb.Count - 1)
                     {
@@ -84,12 +100,18 @@ namespace GestioneAreeCritiche.Output
             writer.WriteStartElement("Document");
 
             writer.WriteStartElement("Aree");
-            for (int index = 0; index < output.LimitiAree.Count; index++)
+            for (int index = 0; index < output.AreeCritiche.Count; index++)
             {
-                int limite = output.LimitiAree[index];
+                IAreaCritica area = output.AreeCritiche[index];
                 writer.WriteStartElement("Area");
                 writer.WriteAttributeString("Id", index.ToString());
-                writer.WriteAttributeString("Limite", limite.ToString());
+                writer.WriteAttributeString("Limite", area.Limite.ToString());
+                foreach (int cdb in area.ListaCdb)
+                {
+                    writer.WriteStartElement("Cdb");
+                    writer.WriteAttributeString("Id", cdb.ToString());
+                    writer.WriteEndElement();
+                }
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();

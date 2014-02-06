@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GestioneAreeCritiche.AreeCritiche;
 
 namespace GestioneAreeCritiche.Output
 {
@@ -7,10 +8,10 @@ namespace GestioneAreeCritiche.Output
         public StrutturaOutput()
         {
             MissioniAnnotate = new List<MissioneAnnotata>();
-            LimitiAree = new List<int>();
+            AreeCritiche = new List<IAreaCritica>();
         }
-
-        public List<int> LimitiAree { get; set; }
+        
+        public List<IAreaCritica> AreeCritiche { get; set; }
 
         public List<MissioneAnnotata> MissioniAnnotate { get; private set; }
     }
