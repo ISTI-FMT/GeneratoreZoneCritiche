@@ -13,6 +13,10 @@ namespace XmlUmcConverter
 {
     class Program
     {
+        enum SezioneUmc
+        {
+            Aree,Missioni,Constraints,Nessuna
+        }
         /// <summary>
         /// Legge un file compatibile con umc contenente vettore dei limiti di area e lista di missioni annotate
         /// Ritorna un oggetto contenente i valori letti dal file
@@ -24,60 +28,71 @@ namespace XmlUmcConverter
             {
                 FileStream sr = File.OpenRead(filename);
                 StreamReader streamReader = new StreamReader(sr);
-                
+
+                SezioneUmc sezioneCorrente = SezioneUmc.Nessuna;
                 while (!streamReader.EndOfStream)
                 {
                     string line = streamReader.ReadLine();
-                    if (string.IsNullOrEmpty(line) || line.Trim() == string.Empty || line.StartsWith("#"))
+                    if (string.IsNullOrEmpty(line) || line.Trim() == string.Empty)
                     {
                         continue;
                     }
 
-                    if (line.StartsWith("[") && line.EndsWith("]"))
+                    if (line.StartsWith("#"))
                     {
-                        line = line.TrimStart('[');
-                        line = line.TrimEnd(']');
-                      //  res.LimitiAree = line.Split(',').Select(limite => Convert.ToInt32(limite.Trim())).ToList();
+                        if (line.StartsWith("#Aree", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            sezioneCorrente = SezioneUmc.Aree;
+                        }
+                        else if (line.StartsWith("#Missioni", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            sezioneCorrente = SezioneUmc.Missioni;
+                        }
+                        else if (line.StartsWith("#Constraints", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            sezioneCorrente = SezioneUmc.Constraints;
+                        }
                     }
                     else
                     {
-                        MissioneAnnotata missione = new MissioneAnnotata();
-                        res.MissioniAnnotate.Add(missione);
-
-                        //controllo se line è nella forma
-                        //V: [2,0,0,0] 8, [0,0,0,0] 7, [-2,0,0,0] 5
-                        string[] missioneStr = line.Split(':');
-                        if (missioneStr.Length != 2)
+                        switch (sezioneCorrente)
                         {
-                            Console.WriteLine("Invalid line:" + line);
-                        }
-                        else
-                        {
-                            missione.Trn = missioneStr[0];
-
-                            //listacdb contiene stringhe nella forma [0,0,0] 4
-                            Regex regex = new Regex(@"\[(\d|\s|,|-|\+)+\](\w|\s)+", RegexOptions.Compiled);
-                            MatchCollection matches = regex.Matches(missioneStr[1]);
-                            foreach (Match match in matches)
-                            {
-                                string token = match.Value;
-                                try
+                            case SezioneUmc.Aree:
+                                //formato:
+                                //0: [7,8], 0
+                                //1: [1,6], 0
+                                string[] missioneStr = line.Split(':');
+                                if (missioneStr.Length != 2)
                                 {
-                                    string[] cdbStrTokens = token.Split(']');
-                                    string cdb = cdbStrTokens[1].Trim();
-                                    string[] azioniStrTokens = cdbStrTokens[0].Trim(new[] { '[', ']',' ' }).Split(',');
-                                    IEnumerable<int> azioniInt = azioniStrTokens.Select(azioneStr => Convert.ToInt32(azioneStr));
-
-                                    missione.ListaCdb.Add(Convert.ToInt32(cdb));
-                                    missione.AzioniCdb.Add(azioniInt.ToArray());
+                                    Console.WriteLine("Invalid line:" + line);
                                 }
-                                catch (Exception)
+                                else
                                 {
-                                    Console.WriteLine("Token non corretto: " + token);
+                                    Regex regex = new Regex(@" \[(\d|\s|,)+\]", RegexOptions.Compiled);
+                                    if (regex.IsMatch(missioneStr[1]))
+                                    {
+                                        Match match = regex.Match(missioneStr[1]);
+                                        string[] cdbs = match.Value.Trim(new[] {']', '[', ' '}).Split(',');
+
+
+                                        string remaining = regex.Replace(missioneStr[1], string.Empty);
+                                        string limitStr = remaining.Trim(new[] {' ', ','});
+
+                                    }
                                 }
-                            }
+                                break;
+                            case SezioneUmc.Missioni:
+                                break;
+                            case SezioneUmc.Constraints:
+                                break;
+                            case SezioneUmc.Nessuna:
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
                     }
+
+
 
                 }
             }
