@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using GestioneAreeCritiche.AreeCritiche;
 using GestioneAreeCritiche.Output;
 
@@ -69,7 +67,7 @@ namespace XmlUmcConverter
                                         string[] areaStr = line.Split(':');
                                         if (areaStr.Length != 2)
                                         {
-                                            Console.WriteLine("Invalid line:" + line);
+                                            Console.WriteLine("Linea non valida, ignorata:" + line);
                                         }
                                         else
                                         {
@@ -110,7 +108,7 @@ namespace XmlUmcConverter
                                         string[] missioniStr = line.Split(':');
                                         if (missioniStr.Length != 2)
                                         {
-                                            Console.WriteLine("Invalid line:" + line);
+                                            Console.WriteLine("Linea non valida, ignorata:" + line);
                                         }
                                         else
                                         {
@@ -136,7 +134,7 @@ namespace XmlUmcConverter
                                         string[] missioniStr = line.Split(':');
                                         if (missioniStr.Length != 2)
                                         {
-                                            Console.WriteLine("Invalid line:" + line);
+                                            Console.WriteLine("Linea non valida, ignorata:" + line);
                                         }
                                         else
                                         {

@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Aree>
+    <Area Id="0" Limite="3">
+      <Cdb Id="1" />
+      <Cdb Id="2" />
+      <Cdb Id="2" />
+      <Cdb Id="3" />
+      <Cdb Id="3" />
+      <Cdb Id="4" />
+      <Cdb Id="4" />
+      <Cdb Id="1" />
+    </Area>
+  </Aree>
+  <Missioni>
+    <Missione Trn="G">
+      <Cdb Id="1">
+        <Azione IdArea="0">1</Azione>
+      </Cdb>
+      <Cdb Id="2">
+        <Azione IdArea="0">-1</Azione>
+      </Cdb>
+      <Cdb Id="9" />
+      <Cdb Id="10" />
+    </Missione>
+    <Missione Trn="B">
+      <Cdb Id="2">
+        <Azione IdArea="0">1</Azione>
+      </Cdb>
+      <Cdb Id="3">
+        <Azione IdArea="0">-1</Azione>
+      </Cdb>
+      <Cdb Id="7" />
+      <Cdb Id="8" />
+    </Missione>
+    <Missione Trn="V">
+      <Cdb Id="13" />
+      <Cdb Id="3">
+        <Azione IdArea="0">1</Azione>
+      </Cdb>
+      <Cdb Id="4">
+        <Azione IdArea="0">-1</Azione>
+      </Cdb>
+      <Cdb Id="11" />
+    </Missione>
+    <Missione Trn="R">
+      <Cdb Id="12" />
+      <Cdb Id="4">
+        <Azione IdArea="0">1</Azione>
+      </Cdb>
+      <Cdb Id="1" />
+    </Missione>
+    <Missione Trn="X">
+      <Cdb Id="12" />
+      <Cdb Id="4">
+        <Azione IdArea="0">1</Azione>
+      </Cdb>
+      <Cdb Id="1" />
+    </Missione>
+  </Missioni>
+</Document>

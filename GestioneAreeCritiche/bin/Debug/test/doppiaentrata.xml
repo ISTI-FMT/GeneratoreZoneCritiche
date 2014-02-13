@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Aree>
+    <Area Id="0" Limite="0">
+      <Cdb Id="1" />
+      <Cdb Id="3" />
+    </Area>
+  </Aree>
+  <Missioni>
+    <Missione Trn="T0">
+      <Cdb Id="1">
+        <Azione IdArea="0">3</Azione>
+      </Cdb>
+      <Cdb Id="3" />
+      <Cdb Id="4">
+        <Azione IdArea="0">-3</Azione>
+      </Cdb>
+      <Cdb Id="3" />
+      <Cdb Id="1" />
+    </Missione>
+    <Missione Trn="T1">
+      <Cdb Id="5" />
+      <Cdb Id="3">
+        <Azione IdArea="0">2</Azione>
+      </Cdb>
+      <Cdb Id="1" />
+      <Cdb Id="6">
+        <Azione IdArea="0">-2</Azione>
+      </Cdb>
+    </Missione>
+  </Missioni>
+</Document>

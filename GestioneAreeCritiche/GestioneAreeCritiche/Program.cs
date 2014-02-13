@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using GestioneAreeCritiche.AreeCritiche;
 using GestioneAreeCritiche.Output;
@@ -10,6 +11,17 @@ namespace GestioneAreeCritiche
 {
     public class Program
     {
+        private const int NessunaAzione = 0;
+        private const int EntraSinistra = 3;
+        private const int EsciSinistra = -3;
+        private const int EntraDestra = 2;
+        private const int EsciDestra = -2;
+        private const int EntraStessaDirezione = 4;
+        private const int EsciStessaDirezione = -4;
+
+        /// <summary>
+        /// Ritorna una lista di missioni (lista di ID di CDB) a partire da un file di testo
+        /// </summary>
         private static List<MissioneTreno> CaricaMissioni(string nomefile)
         {
             List<MissioneTreno> missioni = new List<MissioneTreno>();
@@ -30,23 +42,23 @@ namespace GestioneAreeCritiche
 
                     //Formato di una riga
                     // nometreno = [ x,y,z ]
-                    if (!string.IsNullOrEmpty(line))
+                    if (string.IsNullOrEmpty(line) || line[0] == '#')
+                        continue;
+
+                    string[] tokens = line.Split('=');
+                    if (tokens.Length > 1)
                     {
-                        string[] tokens = line.Split('=');
-                        if (tokens.Length > 1)
-                        {
-                            string nometreno = tokens[0].Trim();
+                        string nometreno = tokens[0].Trim();
 
-                            string cdb = tokens[1].TrimStart(new[] { '[', ' ' });
-                            cdb = cdb.TrimEnd(new[] { ']', ' ' });
-                            cdb = cdb.Replace(" ", "");
-                            List<string> cdbList = cdb.Split(',').ToList();
-                            List<int> cdbListInt = cdbList.ConvertAll(Convert.ToInt32);
+                        string cdb = tokens[1].TrimStart(new[] { '[', ' ' });
+                        cdb = cdb.TrimEnd(new[] { ']', ' ' });
+                        cdb = cdb.Replace(" ", "");
+                        List<string> cdbList = cdb.Split(',').ToList();
+                        List<int> cdbListInt = cdbList.ConvertAll(Convert.ToInt32);
 
-                            missioni.Add(new MissioneTreno(nometreno, cdbListInt));
+                        missioni.Add(new MissioneTreno(nometreno, cdbListInt));
 
-                            Console.WriteLine("{0}= [{1}]", nometreno, cdb);
-                        }
+                        Console.WriteLine("{0}= [{1}]", nometreno, cdb);
                     }
                 }
 
@@ -72,13 +84,133 @@ namespace GestioneAreeCritiche
         }
 
         /// <summary>
-        /// Genera i vettori annotati di output sia su console che su file di log
+        /// Genera la struttura contenente la lista di aree critiche e lista di missioni annotate con entrata e uscita dalle aree critiche
+        /// le annotazioni contengono un intero per azione da effettuare:
         ///0 : nessuna azione
         //+ / - 1: aumenta o diminuisci contatore del numero di treni nella regione
         //+ / - 2: aumenta o diminuisci il contatore del numero di treni entrati da destra
         //+ / - 3: aumenta o diminuisci il contatore del numero di treni entrati da sinistra
         //+ / - 4: aumenta o diminuisci il contatore del numero di treni che entrano ed escono dalla stessa direzione.
         /// </summary>
+        //private static StrutturaOutput GeneraStrutturaOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
+        //{
+        //    StrutturaOutput res = new StrutturaOutput();
+        //    res.AreeCritiche.AddRange(areeLineari);
+        //    res.AreeCritiche.AddRange(areeCircolari);
+
+        //    //--- Generazione della lista di vettori annotati
+        //    foreach (MissioneTreno missioneTreno in missioni)
+        //    {
+        //        MissioneAnnotata missioneAnnotata = new MissioneAnnotata();
+        //        missioneAnnotata.Trn = missioneTreno.NomeTreno;
+        //        res.MissioniAnnotate.Add(missioneAnnotata);
+
+        //        Dictionary<AreaCriticaCircolare, int> areeCorrenti = new Dictionary<AreaCriticaCircolare, int>();
+        //        Dictionary<int, int> uscitaAree = new Dictionary<int, int>();
+
+        //        for (int i = 0; i < areeLineari.Count; i++)
+        //        {
+        //            AreaCriticaLineare areaCriticaLineare = areeLineari[i];
+
+                    
+
+
+
+        //        }
+
+
+        //        for (int cdbIndex = 0; cdbIndex < missioneTreno.CdbList.Count; cdbIndex++)
+        //        {
+        //            int cdb = missioneTreno.CdbList[cdbIndex];
+        //            int[] azioni = new int[areeLineari.Count + areeCircolari.Count];
+
+        //            //Se l'ingresso in questo cdb comporta l'uscita da un area precedente, inizializzo
+        //            //l'azione corrispondente
+        //            foreach (KeyValuePair<int, int> valoreUscita in uscitaAree)
+        //            {
+        //                azioni[valoreUscita.Key] = valoreUscita.Value;
+        //            }
+        //            uscitaAree = new Dictionary<int, int>();
+
+        //            for (int i = 0; i < areeLineari.Count; i++)
+        //            {
+        //                AreaCriticaLineare areaCriticaLineare = areeLineari[i];
+
+
+
+        //                if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno) &&
+        //                    areaCriticaLineare.ListaCdb[0] == cdb)
+        //                {
+        //                    //entra sinistra
+        //                    azioni[i] = 3;
+        //                }
+        //                if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno) &&
+        //                    areaCriticaLineare.ListaCdb[areaCriticaLineare.ListaCdb.Count - 1] == cdb)
+        //                {
+        //                    //esci sinistra
+        //                    uscitaAree[i] = -3;
+        //                }
+
+        //                if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno) &&
+        //                    areaCriticaLineare.ListaCdb[areaCriticaLineare.ListaCdb.Count - 1] == cdb)
+        //                {
+        //                    //entra destra
+        //                    azioni[i] = 2;
+        //                }
+        //                if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno) &&
+        //                    areaCriticaLineare.ListaCdb[0] == cdb)
+        //                {
+        //                    //esci destra
+        //                    uscitaAree[i] = -2;
+        //                }
+        //            }
+
+        //            for (int i = 0; i < areeCircolari.Count; i++)
+        //            {
+        //                AreaCriticaCircolare areaCriticaCircolare = areeCircolari[i];
+
+        //                if (areaCriticaCircolare.Treni.Contains(missioneTreno.NomeTreno) &&
+        //                    areaCriticaCircolare.ListaCdb.Contains(cdb))
+        //                {
+        //                    if (!areeCorrenti.ContainsKey(areaCriticaCircolare))
+        //                    {
+        //                        // Sono entrato dentro una area circolare nuova
+        //                        areeCorrenti.Add(areaCriticaCircolare, i);
+        //                        azioni[i + areeLineari.Count] = 1;
+        //                    }
+
+        //                    if (cdbIndex < missioneTreno.CdbList.Count - 1)
+        //                    {
+        //                        //Se non sono l'ultimo cdb della missione, controllo se sto uscendo dall'area (ovvero il prossimo cdb non fa parte dell'area corrente)
+        //                        int nextcdb = missioneTreno.CdbList[cdbIndex + 1];
+        //                        if (!areaCriticaCircolare.ListaCdb.Contains(nextcdb))
+        //                        {
+        //                            //Esco dall'area circolare (Nota: nelle missioni circolari si esce con un passo in anticipo)
+        //                            azioni[areeCorrenti[areaCriticaCircolare] + areeLineari.Count] = -1;
+        //                            areeCorrenti.Remove(areaCriticaCircolare);
+        //                        }
+        //                    }
+        //                }
+        //            }
+
+        //            missioneAnnotata.AzioniCdb.Add(azioni);
+        //            missioneAnnotata.ListaCdb.Add(cdb);
+        //        }
+        //    }
+
+        //    return res;
+        //}
+
+        public static IEnumerable<int> StartingIndex(List<int> x, List<int> y)
+        {
+            IEnumerable<int> index = Enumerable.Range(0, x.Count - y.Count + 1);
+            for (int i = 0; i < y.Count; i++)
+            {
+                index = index.Where(n => x[n + i] == y[i]).ToArray();
+            }
+            return index;
+        }
+
         private static StrutturaOutput GeneraStrutturaOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
         {
             StrutturaOutput res = new StrutturaOutput();
@@ -89,55 +221,64 @@ namespace GestioneAreeCritiche
             foreach (MissioneTreno missioneTreno in missioni)
             {
                 MissioneAnnotata missioneAnnotata = new MissioneAnnotata();
+                //Inizializzazione del nome treno
                 missioneAnnotata.Trn = missioneTreno.NomeTreno;
+                //Inizializzazione della lista di cdb
+                missioneAnnotata.ListaCdb.AddRange(missioneTreno.CdbList);
+                //Inizializzazione delle azioni (zero di default)
+                for (int i = 0; i < missioneTreno.CdbList.Count; i++)
+                {
+                    missioneAnnotata.AzioniCdb.Add(new int[res.AreeCritiche.Count]);
+                }
                 res.MissioniAnnotate.Add(missioneAnnotata);
 
+                
+                for (int i = 0; i < areeLineari.Count; i++)
+                {
+                    AreaCriticaLineare areaCriticaLineare = areeLineari[i];
+
+                    //treni che entrano da sinistra
+                    if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno))
+                    {
+                        //cerco tutti gli indici di inizio dell'area critica all'interno della missione
+                        foreach (int indiceCdb in StartingIndex(missioneTreno.CdbList, areaCriticaLineare.ListaCdb))
+                        {
+                            missioneAnnotata.AzioniCdb[indiceCdb][i] = EntraSinistra;
+
+                            if (indiceCdb + areaCriticaLineare.ListaCdb.Count < missioneAnnotata.AzioniCdb.Count)
+                            {
+                                missioneAnnotata.AzioniCdb[indiceCdb + areaCriticaLineare.ListaCdb.Count][i] = EsciSinistra;    
+                            }
+                        }
+                    }
+
+                    //treni che entrano da destra
+                    if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno))
+                    {
+                        //visto che i treni entrano da destra, devo cercare i cdb in ordine inverso
+                        List<int> cdbInvertiti = areaCriticaLineare.ListaCdb.ToList();
+                        cdbInvertiti.Reverse();
+
+                        //cerco tutti gli indici di inizio dell'area critica all'interno della missione
+                        foreach (int indiceCdb in StartingIndex(missioneTreno.CdbList, cdbInvertiti))
+                        {
+                            missioneAnnotata.AzioniCdb[indiceCdb][i] = EntraDestra;
+
+                            if (indiceCdb + areaCriticaLineare.ListaCdb.Count < missioneAnnotata.AzioniCdb.Count)
+                            {
+                                missioneAnnotata.AzioniCdb[indiceCdb + areaCriticaLineare.ListaCdb.Count][i] = EsciDestra;
+                            }
+                        }
+                    }
+                }
+
                 Dictionary<AreaCriticaCircolare, int> areeCorrenti = new Dictionary<AreaCriticaCircolare, int>();
-                Dictionary<int, int> uscitaAree = new Dictionary<int, int>();
                 for (int cdbIndex = 0; cdbIndex < missioneTreno.CdbList.Count; cdbIndex++)
                 {
                     int cdb = missioneTreno.CdbList[cdbIndex];
-                    int[] azioni = new int[areeLineari.Count + areeCircolari.Count];
 
                     //Se l'ingresso in questo cdb comporta l'uscita da un area precedente, inizializzo
                     //l'azione corrispondente
-                    foreach (KeyValuePair<int, int> valoreUscita in uscitaAree)
-                    {
-                        azioni[valoreUscita.Key] = valoreUscita.Value;
-                    }
-                    uscitaAree = new Dictionary<int, int>();
-
-                    for (int i = 0; i < areeLineari.Count; i++)
-                    {
-                        AreaCriticaLineare areaCriticaLineare = areeLineari[i];
-
-                        if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.ListaCdb[0] == cdb)
-                        {
-                            //entra sinistra
-                            azioni[i] = 3;
-                        }
-                        if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.ListaCdb[areaCriticaLineare.ListaCdb.Count - 1] == cdb)
-                        {
-                            //esci sinistra
-                            uscitaAree[i] = -3;
-                        }
-
-                        if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.ListaCdb[areaCriticaLineare.ListaCdb.Count - 1] == cdb)
-                        {
-                            //entra destra
-                            azioni[i] = 2;
-                        }
-                        if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno) &&
-                            areaCriticaLineare.ListaCdb[0] == cdb)
-                        {
-                            //esci destra
-                            uscitaAree[i] = -2;
-                        }
-                    }
-
                     for (int i = 0; i < areeCircolari.Count; i++)
                     {
                         AreaCriticaCircolare areaCriticaCircolare = areeCircolari[i];
@@ -149,7 +290,7 @@ namespace GestioneAreeCritiche
                             {
                                 // Sono entrato dentro una area circolare nuova
                                 areeCorrenti.Add(areaCriticaCircolare, i);
-                                azioni[i + areeLineari.Count] = 1;
+                                missioneAnnotata.AzioniCdb[cdbIndex][i + areeLineari.Count] = 1;
                             }
 
                             if (cdbIndex < missioneTreno.CdbList.Count - 1)
@@ -159,15 +300,12 @@ namespace GestioneAreeCritiche
                                 if (!areaCriticaCircolare.ListaCdb.Contains(nextcdb))
                                 {
                                     //Esco dall'area circolare (Nota: nelle missioni circolari si esce con un passo in anticipo)
-                                    azioni[areeCorrenti[areaCriticaCircolare] + areeLineari.Count] = -1;
+                                    missioneAnnotata.AzioniCdb[cdbIndex][areeCorrenti[areaCriticaCircolare] + areeLineari.Count] = -1;
                                     areeCorrenti.Remove(areaCriticaCircolare);
                                 }
                             }
                         }
                     }
-
-                    missioneAnnotata.AzioniCdb.Add(azioni);
-                    missioneAnnotata.ListaCdb.Add(cdb);
                 }
             }
 
@@ -178,15 +316,12 @@ namespace GestioneAreeCritiche
         {
             Console.WriteLine("Utilizzo:");
             Console.WriteLine("GestioneAreeCritiche <nomefile>");
-            Console.WriteLine("GestioneAreeCritiche --convert <nomefile.umc>|<nomefile.xml>");
             Console.WriteLine("Press any key to exit...");
             Console.Read();
         }
 
-        private static void Main(string[] args)
+        private static bool ValidazioneInput(string[] args)
         {
-            string nomefile = null;
-
             Console.WriteLine();
 
             if (args.Length == 1)
@@ -195,16 +330,25 @@ namespace GestioneAreeCritiche
                 {
                     Console.WriteLine("Il file " + args[0] + " non esiste");
                     PrintUsage();
-                    return;
+                    return false;
                 }
-
-                nomefile = args[0];
             }
             else
             {
                 PrintUsage();
+                return false;
+            }
+            return true;
+        }
+
+        private static void Main(string[] args)
+        {
+            if (!ValidazioneInput(args))
+            {
                 return;
             }
+
+            string nomefile = args[0];
 
             List<MissioneTreno> missioni = CaricaMissioni(nomefile);
 

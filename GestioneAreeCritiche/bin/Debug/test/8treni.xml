@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Aree>
+    <Area Id="0" Limite="7">
+      <Cdb Id="13" />
+      <Cdb Id="15" />
+      <Cdb Id="15" />
+      <Cdb Id="20" />
+      <Cdb Id="20" />
+      <Cdb Id="25" />
+      <Cdb Id="25" />
+      <Cdb Id="22" />
+      <Cdb Id="22" />
+      <Cdb Id="17" />
+      <Cdb Id="17" />
+      <Cdb Id="18" />
+      <Cdb Id="18" />
+      <Cdb Id="11" />
+      <Cdb Id="11" />
+      <Cdb Id="13" />
+    </Area>
+    <Area Id="1" Limite="7">
+      <Cdb Id="11" />
+      <Cdb Id="13" />
+      <Cdb Id="13" />
+      <Cdb Id="15" />
+      <Cdb Id="15" />
+      <Cdb Id="20" />
+      <Cdb Id="20" />
+      <Cdb Id="26" />
+      <Cdb Id="26" />
+      <Cdb Id="22" />
+      <Cdb Id="22" />
+      <Cdb Id="17" />
+      <Cdb Id="17" />
+      <Cdb Id="18" />
+      <Cdb Id="18" />
+      <Cdb Id="11" />
+    </Area>
+  </Aree>
+  <Missioni>
+    <Missione Trn="G1">
+      <Cdb Id="1" />
+      <Cdb Id="9" />
+      <Cdb Id="10" />
+      <Cdb Id="13">
+        <Azione IdArea="0">1</Azione>
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="15" />
+      <Cdb Id="20">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="23" />
+    </Missione>
+    <Missione Trn="R1">
+      <Cdb Id="3" />
+      <Cdb Id="9" />
+      <Cdb Id="10" />
+      <Cdb Id="13">
+        <Azione IdArea="0">1</Azione>
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="15" />
+      <Cdb Id="20">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="24" />
+    </Missione>
+    <Missione Trn="Y1">
+      <Cdb Id="5" />
+      <Cdb Id="27" />
+      <Cdb Id="11">
+        <Azione IdArea="0">1</Azione>
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="13">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="16" />
+      <Cdb Id="20">
+        <Azione IdArea="0">1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="25" />
+    </Missione>
+    <Missione Trn="B1">
+      <Cdb Id="7" />
+      <Cdb Id="27" />
+      <Cdb Id="11">
+        <Azione IdArea="0">1</Azione>
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="13">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="16" />
+      <Cdb Id="20">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="26" />
+    </Missione>
+    <Missione Trn="G2">
+      <Cdb Id="23" />
+      <Cdb Id="22">
+        <Azione IdArea="0">1</Azione>
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="17" />
+      <Cdb Id="18" />
+      <Cdb Id="11">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="9" />
+      <Cdb Id="2" />
+    </Missione>
+    <Missione Trn="R2">
+      <Cdb Id="24" />
+      <Cdb Id="22">
+        <Azione IdArea="0">1</Azione>
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="17" />
+      <Cdb Id="18" />
+      <Cdb Id="11">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="9" />
+      <Cdb Id="4" />
+    </Missione>
+    <Missione Trn="Y2">
+      <Cdb Id="25">
+        <Azione IdArea="0">1</Azione>
+      </Cdb>
+      <Cdb Id="22">
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="17" />
+      <Cdb Id="18">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="12" />
+      <Cdb Id="27" />
+      <Cdb Id="6" />
+    </Missione>
+    <Missione Trn="B2">
+      <Cdb Id="26">
+        <Azione IdArea="1">1</Azione>
+      </Cdb>
+      <Cdb Id="22">
+        <Azione IdArea="0">1</Azione>
+      </Cdb>
+      <Cdb Id="17" />
+      <Cdb Id="18">
+        <Azione IdArea="0">-1</Azione>
+        <Azione IdArea="1">-1</Azione>
+      </Cdb>
+      <Cdb Id="12" />
+      <Cdb Id="27" />
+      <Cdb Id="8" />
+    </Missione>
+  </Missioni>
+</Document>

@@ -12,9 +12,9 @@ namespace XmlUmcConverter
             StrutturaOutput strutturaOutput = UmcParser.ParseUmc(sourceFile);
 
             
-            string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".umc_2";
+            string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".xml";
             Console.WriteLine("Generazione XML...");
-            GenerazioneOutput.ToUmc(strutturaOutput, outfile);
+            GenerazioneOutput.ToXml(strutturaOutput, outfile);
         }
 
         private static void XmlToUmc(string sourceFile, string destFile)
@@ -22,9 +22,9 @@ namespace XmlUmcConverter
             Console.WriteLine("Parsing XML...");
             StrutturaOutput strutturaOutput = XmlAreeParser.ParseXml(sourceFile);
 
-            string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".xml_2";
+            string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".umc";
             Console.WriteLine("Generazione UMC...");
-            GenerazioneOutput.ToXml(strutturaOutput, outfile);
+            GenerazioneOutput.ToUmc(strutturaOutput, outfile);
         }
 
 
