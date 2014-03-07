@@ -97,7 +97,7 @@ namespace GestioneAreeCritiche.Output
 
             XmlWriter writer = XmlWriter.Create(outfile, settings);
 
-            writer.WriteStartElement("Document");
+            writer.WriteStartElement("Document", "urn:AreeCritiche-schema");
 
             writer.WriteStartElement("Aree");
             for (int index = 0; index < output.AreeCritiche.Count; index++)
