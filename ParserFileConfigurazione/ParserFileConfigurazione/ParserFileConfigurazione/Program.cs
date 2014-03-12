@@ -87,8 +87,7 @@ namespace ParserFileConfigurazione
 
             foreach (int treno in missioni.Keys)
             {
-                Console.Write(treno + ": ");
-                Console.WriteLine(string.Join(",", missioni[treno]));
+                Console.WriteLine("{0} = [{1}]", treno, string.Join(",", missioni[treno]));
             }
 
         }
