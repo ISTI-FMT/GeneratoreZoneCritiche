@@ -83,7 +83,6 @@
       <Cdb Id="16" />
       <Cdb Id="20">
         <Azione IdArea="0">1</Azione>
-        <Azione IdArea="1">-1</Azione>
       </Cdb>
       <Cdb Id="25" />
     </Missione>
@@ -100,7 +99,6 @@
       </Cdb>
       <Cdb Id="16" />
       <Cdb Id="20">
-        <Azione IdArea="0">-1</Azione>
         <Azione IdArea="1">1</Azione>
       </Cdb>
       <Cdb Id="26" />
