@@ -7,7 +7,7 @@ using System.Xml;
 using GestioneAreeCritiche.AreeCritiche;
 using GestioneAreeCritiche.Output;
 
-namespace XmlUmcConverter
+namespace GestioneAreeCritiche.Conversione
 {
     internal  static class XmlAreeParser
     {
@@ -15,9 +15,9 @@ namespace XmlUmcConverter
         /// Legge un file xml contenente vettore dei limiti di area e lista di missioni annotate
         /// Ritorna un oggetto contenente i valori letti dal file
         /// </summary>
-        internal static StrutturaOutput ParseXml(string sourcefile)
+        internal static DatiAree ParseXml(string sourcefile)
         {
-            StrutturaOutput res = new StrutturaOutput();
+            DatiAree res = new DatiAree();
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.IgnoreWhitespace = true;
             settings.IgnoreComments = true;
@@ -57,6 +57,7 @@ namespace XmlUmcConverter
                     {
                         area = new AreaCriticaCircolare();
                         area.ListaCdb = listaCdb;
+                        ((AreaCriticaCircolare)area).Limite = listaCdb.Count - 1;
                     }
                     res.AreeCritiche.Add(area);
                 }

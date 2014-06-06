@@ -8,14 +8,14 @@ namespace GestioneAreeCritiche.Output
 {
     public static class GenerazioneOutput
     {
-        public static void ToConsoleOutput(StrutturaOutput output)
+        public static void ToConsoleOutput(DatiAree output)
         {
             Console.WriteLine("Output:");
             GeneraUmc(output, Console.Out);
         }
 
 
-        public static void ToUmc(StrutturaOutput output, string outfile)
+        public static void ToUmc(DatiAree output, string outfile)
         {
             StreamWriter sw = null;
             FileStream fs = null;
@@ -46,7 +46,7 @@ namespace GestioneAreeCritiche.Output
         /// <summary>
         /// Scrive la struttura di output in uno stream generico (file o console) in formato compatibile con UMC
         /// </summary>
-        private static void GeneraUmc(StrutturaOutput output, TextWriter sw)
+        private static void GeneraUmc(DatiAree output, TextWriter sw)
         {
             sw.WriteLine("#Missioni:");
             foreach (MissioneAnnotata missione in output.MissioniAnnotate)
@@ -89,7 +89,7 @@ namespace GestioneAreeCritiche.Output
         /// <summary>
         /// Scrive la struttura di oputput in un file XML
         /// </summary>
-        public static void ToXml(StrutturaOutput output, string outfile)
+        public static void ToXml(DatiAree output, string outfile)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;

@@ -44,16 +44,29 @@
   <ItemGroup>
     <Compile Include="AreeCritiche\AreaCriticaCircolare.cs" />
     <Compile Include="AreeCritiche\AreaCriticaLineare.cs" />
+    <Compile Include="AreeCritiche\GeneratoreAreeComposte.cs" />
     <Compile Include="AreeCritiche\IAreaCritica.cs" />
     <Compile Include="CdbVisitato.cs" />
+    <Compile Include="Conversione\Conversione.cs" />
+    <Compile Include="Conversione\UmcParser.cs" />
+    <Compile Include="Conversione\XmlAreeParser.cs" />
+    <Compile Include="ModelChecking\CheckLiveness.cs" />
+    <Compile Include="ModelChecking\Deadlock.cs" />
+    <Compile Include="ModelChecking\StatoAree.cs" />
+    <Compile Include="ModelChecking\StatoMissione.cs" />
+    <Compile Include="ModelChecking\StatoTreni.cs" />
     <Compile Include="Output\MissioneAnnotata.cs" />
     <Compile Include="MissioneTreno.cs" />
     <Compile Include="Output\GenerazioneOutput.cs" />
+    <Compile Include="ParserConfigurazioneATS\ParserATS.cs" />
+    <Compile Include="ParserConfigurazioneATS\StazioneATS.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RicercaAreeCircolari.cs" />
     <Compile Include="RicercaAreeLineari.cs" />
     <Compile Include="Output\StrutturaOutput.cs" />
+    <Compile Include="ModelChecking\TrovaDeadlock.cs" />
+    <Compile Include="TrovaAree\TrovaAreeCritiche.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,19 +1,19 @@
-﻿using System;
+﻿using GestioneAreeCritiche.TrovaAree;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
-namespace ParserFileConfigurazione
+namespace GestioneAreeCritiche.ParserConfigurazioneATS
 {
-    class Program
+    internal class ParserATS
     {
         /// <summary>
         /// Legge un file xml contenente vettore dei limiti di area e lista di missioni annotate
         /// Ritorna un oggetto contenente i valori letti dal file
         /// </summary>
-        internal static void ParseTabellaOrario(string sourcefile, List<Stazione> stazioni)
+        private static void ParseTabellaOrario(string sourcefile, List<Stazione> stazioni)
         {
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.IgnoreWhitespace = true;
@@ -35,7 +35,7 @@ namespace ParserFileConfigurazione
 
                     XmlReader stazioneReader = myReader.ReadSubtree();
                     int stazioneCorrente = -1;
-                    
+
                     while (stazioneReader.Read())
                     {
                         if (stazioneReader.NodeType != XmlNodeType.Element)
@@ -53,13 +53,13 @@ namespace ParserFileConfigurazione
 
                             List<int> puntiTrenoCorrente = missioni[trenoCorrente];
 
-                            //se non c'è già, iserisco il punto di stazionamento
+                            //se non c'è già, iserisco il punto di ingresso
                             if (puntiTrenoCorrente.Count == 0 || puntiTrenoCorrente[puntiTrenoCorrente.Count - 1] != itinerario.PrevCdb)
                             {
                                 puntiTrenoCorrente.Add(itinerario.PrevCdb);
                             }
 
-                            //ultimo cdb dell'itinerario
+                            //ultimo cdb dell'itinerario (punto di stazionamento)
                             puntiTrenoCorrente.Add(itinerario.Cdbs[itinerario.Cdbs.Count - 1]);
                         }
                         else if (stazioneReader.Name == "itinerarioUscita")
@@ -80,19 +80,19 @@ namespace ParserFileConfigurazione
                             puntiTrenoCorrente.Add(itinerario.Cdbs[itinerario.Cdbs.Count - 1]);
                         }
                     }
-
-
                 }
             }
 
+            List<MissioneTreno> missioniList = new List<MissioneTreno>();
             foreach (int treno in missioni.Keys)
             {
-                Console.WriteLine("{0} = [{1}]", treno, string.Join(",", missioni[treno]));
+                missioniList.Add(new MissioneTreno(treno.ToString(), missioni[treno]));
             }
 
+            TrovaAreeCritiche.Trova(missioniList, "AreeCritiche");
         }
 
-        internal static List<Stazione> CaricaStazioni(string sourcefile)
+        private static List<Stazione> CaricaStazioni(string sourcefile)
         {
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.IgnoreWhitespace = true;
@@ -163,7 +163,7 @@ namespace ParserFileConfigurazione
             return stazioni;
         }
 
-        static void Main(string[] args)
+        internal static void Parse()
         {
             var stazioni = CaricaStazioni("ConfigurazioneItinerari.xml");
             ParseTabellaOrario("TabellaOrario.xml", stazioni);

@@ -13,23 +13,51 @@ namespace GestioneAreeCritiche.AreeCritiche
             Treni = new HashSet<string>();
         }
 
-        public List<int> ListaCdb { get; set; }
+        private List<int> _listaCdb;
+        public List<int> ListaCdb { get { return _listaCdb; } set { _listaCdb = value; } }
 
         public int Limite
         {
-            get
-            {
-                if (ListaCdb.Count == 0)
-                {
-                    return 0;
-                }
-                //La lista di cdb contiene cdb a coppie quindi il numero di  cdb è la sua metà
-                //esempio: 1,2,2,3,3,4,4,1 => 1,2,3,4
-                return (ListaCdb.Count / 2) - 1;
-            }
+            get;
+            set;
         }
 
         public HashSet<string> Treni { get; private set; }
+        private int treni = 0;
+
+        public void Reset()
+        {
+            treni = 0;
+        }
+
+        public bool entrataPermessa(string idTreno, int cdb, int tipoEntrata)
+        {
+            bool res = true;
+            //l'ingresso è negato se:
+            //- il cdb è uno di quelli dell'area
+            //- il treno non è già dentro l'area
+            //- l'area ha già il numero massimo di treni
+            if (tipoEntrata == 1)
+            {
+                if (treni >= Limite)
+                {
+                    res = false;
+                }
+            }
+            return res;
+        }
+
+        public void entrata(string idTreno, int cdb, int tipoEntrata)
+        {
+            if (tipoEntrata == 1)
+            {
+                treni++;
+            }
+            else if (tipoEntrata == -1)
+            {
+                treni--;
+            }
+        }
 
         public bool Equals(AreaCriticaCircolare other)
         {
@@ -52,19 +80,18 @@ namespace GestioneAreeCritiche.AreeCritiche
 
         public string GetListaCdbStr()
         {
-            //La lista di cdb contiene cdb a coppie quindi il numero di  cdb è la sua metà
-            //esempio: 1,2,2,3,3,4,4,1 => 1,2,3,4
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < ListaCdb.Count; i = i + 2)
-            {
-                sb.Append(ListaCdb[i]);
+            string res = string.Join(",", ListaCdb);
+            return res;
+        }
 
-                if (i < ListaCdb.Count - 2)
-                {
-                    sb.Append(',');
-                }
-            }
-            return sb.ToString();
+        public object Clone()
+        {
+            AreaCriticaCircolare areaClone = new AreaCriticaCircolare();
+            areaClone.ListaCdb = ListaCdb;
+            areaClone.Treni = Treni;
+            areaClone.treni = treni;
+            areaClone.Limite = Limite;
+            return areaClone;
         }
     }
 }

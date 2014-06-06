@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using GestioneAreeCritiche.AreeCritiche;
 using GestioneAreeCritiche.Output;
 
-namespace XmlUmcConverter
+namespace GestioneAreeCritiche.Conversione
 {
     internal class UmcParser
     {
@@ -19,9 +19,9 @@ namespace XmlUmcConverter
         /// Legge un file compatibile con umc contenente vettore dei limiti di area e lista di missioni annotate
         /// Ritorna un oggetto contenente i valori letti dal file
         /// </summary>
-        internal static StrutturaOutput ParseUmc(string filename)
+        internal static DatiAree ParseUmc(string filename)
         {
-            StrutturaOutput res = new StrutturaOutput();
+            DatiAree res = new DatiAree();
             Dictionary<string, MissioneAnnotata> missioniAnnotate = new Dictionary<string, MissioneAnnotata>();
             try
             {
@@ -90,6 +90,7 @@ namespace XmlUmcConverter
                                                 {
                                                     area = new AreaCriticaCircolare();
                                                     area.ListaCdb = cdbsInt;
+                                                    ((AreaCriticaCircolare)area).Limite = cdbsInt.Count - 1;
                                                 }
                                                 else
                                                 {

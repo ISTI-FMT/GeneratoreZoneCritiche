@@ -2,15 +2,14 @@
 using System.IO;
 using GestioneAreeCritiche.Output;
 
-namespace XmlUmcConverter
+namespace GestioneAreeCritiche.Conversione
 {
-    class Program
+    internal class Convertitore
     {
         private static void UmcToXml(string sourceFile, string destFile)
         {
             Console.WriteLine("Parsing UMC...");
-            StrutturaOutput strutturaOutput = UmcParser.ParseUmc(sourceFile);
-
+            DatiAree strutturaOutput = UmcParser.ParseUmc(sourceFile);
             
             string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".xml";
             Console.WriteLine("Generazione XML...");
@@ -20,41 +19,21 @@ namespace XmlUmcConverter
         private static void XmlToUmc(string sourceFile, string destFile)
         {
             Console.WriteLine("Parsing XML...");
-            StrutturaOutput strutturaOutput = XmlAreeParser.ParseXml(sourceFile);
+            DatiAree strutturaOutput = XmlAreeParser.ParseXml(sourceFile);
 
             string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".umc";
             Console.WriteLine("Generazione UMC...");
             GenerazioneOutput.ToUmc(strutturaOutput, outfile);
         }
 
-
-        private static void PrintUsage()
+        internal static void Converti(string nomefile)
         {
-            Console.WriteLine("Utilizzo:");
-            Console.WriteLine("XmlUmcConverter <nomefile>.umc|.xml");
-            Console.WriteLine("Press any key to exit...");
-            Console.Read();
-        }
-
-        static void Main(string[] args)
-        {
-            string nomefile;
             Console.WriteLine();
 
-            if (args.Length == 1)
+            if (!File.Exists(nomefile))
             {
-                if (!File.Exists(args[0]))
-                {
-                    Console.WriteLine("Il file " + args[0] + " non esiste");
-                    PrintUsage();
-                    return;
-                }
-
-                nomefile = args[0];
-            }
-            else
-            {
-                PrintUsage();
+                Console.WriteLine("Il file " + nomefile + " non esiste");
+                Program.PrintUsage();
                 return;
             }
 

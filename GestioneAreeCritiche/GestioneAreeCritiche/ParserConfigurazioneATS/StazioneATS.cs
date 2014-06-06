@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace ParserFileConfigurazione
+namespace GestioneAreeCritiche.ParserConfigurazioneATS
 {
     internal class Itinerario
     {
@@ -21,6 +20,6 @@ namespace ParserFileConfigurazione
         internal int Id { get; set; }
 
         internal List<Itinerario> Entrata = new List<Itinerario>();
-        internal List<Itinerario> Uscita = new List<Itinerario>();        
+        internal List<Itinerario> Uscita = new List<Itinerario>();
     }
 }

@@ -3,9 +3,9 @@ using GestioneAreeCritiche.AreeCritiche;
 
 namespace GestioneAreeCritiche.Output
 {
-    public class StrutturaOutput
+    public class DatiAree
     {
-        public StrutturaOutput()
+        public DatiAree()
         {
             MissioniAnnotate = new List<MissioneAnnotata>();
             AreeCritiche = new List<IAreaCritica>();

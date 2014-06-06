@@ -26,8 +26,18 @@ namespace GestioneAreeCritiche
                     if (loopDepth > 2 && visitati.Count > 4 && visitati[0].Cdb == visitati[visitati.Count - 1].Cdb)
                     {
                         AreaCriticaCircolare circolare = new AreaCriticaCircolare();
+
+                        //Visitati contiene due volte ogni cdb visitato 
                         List<int> visitatiInt = visitati.Select(visitato => visitato.Cdb).ToList();
-                        circolare.ListaCdb = visitatiInt;
+
+                        List<int> cdbs = new List<int>();
+                        for (int v = 0; v < visitatiInt.Count; v = v + 2)
+                        {
+                            cdbs.Add(visitatiInt[v]);
+                        }
+
+                        circolare.ListaCdb = cdbs;
+                        circolare.Limite = cdbs.Count - 1;
 
                         AreaCriticaCircolare circolareEsistente = aree.Find(area => area.Equals(circolare));
                         if (circolareEsistente != null)
