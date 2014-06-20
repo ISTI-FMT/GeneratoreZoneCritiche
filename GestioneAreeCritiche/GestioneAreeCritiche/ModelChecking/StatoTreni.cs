@@ -32,7 +32,7 @@ namespace GestioneAreeCritiche.ModelChecking
 
         public override string ToString()
         {
-            int[] steps = Missioni.Select(missione => missione.CurrentStep).ToArray();
+            int[] steps = Missioni.Select(missione => missione.Cdbs[missione.CurrentStep]).ToArray();
             return string.Join(",", steps);
         }
 

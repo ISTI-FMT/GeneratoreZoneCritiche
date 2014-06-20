@@ -90,7 +90,7 @@ namespace GestioneAreeCritiche.Conversione
                                                 {
                                                     area = new AreaCriticaCircolare();
                                                     area.ListaCdb = cdbsInt;
-                                                    ((AreaCriticaCircolare)area).Limite = cdbsInt.Count - 1;
+                                                    ((AreaCriticaCircolare)area).Limite = limiteInt;
                                                 }
                                                 else
                                                 {

@@ -10,7 +10,11 @@ namespace GestioneAreeCritiche.ModelChecking
         public Deadlock()
         {
             Positions = new List<int>();
+            Bloccati = new HashSet<string>();
         }
+
         public List<int> Positions { get; set; }
+
+        public HashSet<string> Bloccati { get; set; }
     }
 }

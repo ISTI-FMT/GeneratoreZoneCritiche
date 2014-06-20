@@ -96,7 +96,7 @@ namespace GestioneAreeCritiche.TrovaAree
             return index;
         }
 
-        private static DatiAree GeneraStrutturaOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
+        internal static DatiAree GeneraStrutturaOutput(List<AreaCriticaLineare> areeLineari, List<AreaCriticaCircolare> areeCircolari, List<MissioneTreno> missioni)
         {
             DatiAree res = new DatiAree();
             res.AreeCritiche.AddRange(areeLineari);
@@ -123,8 +123,8 @@ namespace GestioneAreeCritiche.TrovaAree
                     AreaCriticaLineare areaCriticaLineare = areeLineari[i];
 
                     //treni che entrano da sinistra
-                    if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno))
-                    {
+                    //if (areaCriticaLineare.TreniSinistra.Contains(missioneTreno.NomeTreno))
+                    //{
                         //cerco tutti gli indici di inizio dell'area critica all'interno della missione
                         foreach (int indiceCdb in StartingIndex(missioneTreno.CdbList, areaCriticaLineare.ListaCdb))
                         {
@@ -135,11 +135,11 @@ namespace GestioneAreeCritiche.TrovaAree
                                 missioneAnnotata.AzioniCdb[indiceCdb + areaCriticaLineare.ListaCdb.Count][i] = EsciSinistra;
                             }
                         }
-                    }
+                    //}
 
                     //treni che entrano da destra
-                    if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno))
-                    {
+                    //if (areaCriticaLineare.TreniDestra.Contains(missioneTreno.NomeTreno))
+                    //{
                         //visto che i treni entrano da destra, devo cercare i cdb in ordine inverso
                         List<int> cdbInvertiti = areaCriticaLineare.ListaCdb.ToList();
                         cdbInvertiti.Reverse();
@@ -154,7 +154,7 @@ namespace GestioneAreeCritiche.TrovaAree
                                 missioneAnnotata.AzioniCdb[indiceCdb + areaCriticaLineare.ListaCdb.Count][i] = EsciDestra;
                             }
                         }
-                    }
+                    //}
                 }
 
                 //Annotazione aree circolari
@@ -170,7 +170,7 @@ namespace GestioneAreeCritiche.TrovaAree
                         AreaCriticaCircolare areaCriticaCircolare = areeCircolari[i];
 
                         //il cdb e il treno sono dell'area critica corrente
-                        if (areaCriticaCircolare.Treni.Contains(missioneTreno.NomeTreno) &&
+                        if (/*areaCriticaCircolare.Treni.Contains(missioneTreno.NomeTreno) &&*/
                             areaCriticaCircolare.ListaCdb.Contains(cdb))
                         {
                             bool entrato = false;

@@ -14,29 +14,27 @@ namespace GestioneAreeCritiche.ModelChecking
         {
             statoFinaleRaggiungibile = false;
 
-            //List<int> cdbs = new List<int>();
-            //for (int i = 0; i < statoTreni.Missioni.Count; i++)
-            //{
-            //    StatoMissione missione = statoTreni.Missioni[i];
-            //    int cdbCorrente = missione.Cdbs[missione.CurrentStep];
-            //    cdbs.Add(cdbCorrente);
-            //}
-
-            //string listacdb = string.Join(",", cdbs);
-            //Console.WriteLine(listacdb);
-
             if (visitati.Contains(statoTreni))
             {
                 return;
             }
-            visitati.Add(statoTreni);            
+            visitati.Add(statoTreni);
+
+            List<int> cdbs = new List<int>();
+            for (int i = 0; i < statoTreni.Missioni.Count; i++)
+            {
+                StatoMissione missione = statoTreni.Missioni[i];
+                int cdbCorrente = missione.Cdbs[missione.CurrentStep];
+                cdbs.Add(cdbCorrente);
+            }
+
+            string listacdb = string.Join(",", cdbs);
             
-            HashSet<string> bloccati = new HashSet<string>();
+            
+            
             bool cannotAdvance = true;
             //bool bloccoArea = false;
-
-
-
+            HashSet<string> bloccati = new HashSet<string>();
             for (int i = 0; i < statoTreni.Missioni.Count; i++)
             {
                 StatoMissione missione = statoTreni.Missioni[i];
@@ -59,9 +57,12 @@ namespace GestioneAreeCritiche.ModelChecking
                         {
                             //il prossimo cdb è occupato, non posso avanzare
                             evolving = false;
-                            bloccati.Add(missione.Trn);
-                            bloccati.Add(missione2.Trn);
-                            break;
+
+                            if (!bloccati.Contains(missione.Trn))
+                                bloccati.Add(missione.Trn);
+
+                            if (!bloccati.Contains(missione2.Trn))
+                                bloccati.Add(missione2.Trn);
                         }
                     }
                 }
@@ -81,13 +82,16 @@ namespace GestioneAreeCritiche.ModelChecking
 
                         if (liveness != null)
                         {
-                            Console.WriteLine("FALSO POSITIVO: AreeCritica blocca il movimento " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext);
+                            string azioniAree = string.Join(",",missione.AzioniCdb[missione.CurrentStep + 1]);
+                            Console.WriteLine(listacdb + ": FALSO POSITIVO: AreeCritica blocca il movimento " +   missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " azioni: [" + azioniAree + "]");
                         }
-                    }                    
+                    }
                 }
 
                 if (evolving)
                 {
+                    //Console.WriteLine(listacdb + ": " + missione.Trn + " Entrata: " + cdbCorrente + "=>" + cdbNext);
+
                     cannotAdvance = false;
 
                     StatoTreni stato2 = statoTreni.Clone();
@@ -107,30 +111,70 @@ namespace GestioneAreeCritiche.ModelChecking
                 }
             }
 
+            if (bloccati.Count > 0)
+            {
+                //
+
+                bool anyfinal = statoTreni.Missioni.Any(missione => missione.Terminata);
+                if (!anyfinal)
+                {
+                    Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(statoTreni, statoAree, false);
+                    if (liveness == null)
+                    {
+                        Deadlock deadlock = new Deadlock();
+                        foreach (StatoMissione missioneDeadlock in statoTreni.Missioni)
+                        {
+                            deadlock.Positions.Add(missioneDeadlock.CurrentStep);
+                        }
+                        deadlock.Bloccati = bloccati;
+                        deadlocks.Add(deadlock);
+                    }
+                }
+            }
+
             if (cannotAdvance)
             {
                 bool final = statoTreni.Missioni.All(missione => missione.Terminata);
 
-                //DEADLOCK!!!!!!!!!
+                //Controllo se c'è un deadlock
 
                 if (!final)
                 {
-                    bool anyfinal = statoTreni.Missioni.Any(missione => missione.Terminata);
-                    if (!anyfinal)
+                    //se nessun movimento è permesso a causa delle aree critiche, non significa che sono in un deadlock
+                    bool nessunaPermessa = true;
+                    foreach (StatoMissione missione in statoTreni.Missioni)
                     {
-                        Deadlock deadlock = new Deadlock();
-                        foreach (StatoMissione missione in statoTreni.Missioni)
+                        if (!missione.Terminata)
                         {
-                            deadlock.Positions.Add(missione.CurrentStep);
+                            int cdbNext = missione.Cdbs[missione.CurrentStep + 1];
+                            if (statoAree.EntrataPermessa(missione, missione.CurrentStep + 1, cdbNext))
+                            {
+                                nessunaPermessa = false;
+                                break;
+                            }
                         }
-                        deadlocks.Add(deadlock);
+                    }
+
+                    if (!nessunaPermessa)
+                    {
+                        bool anyfinal = statoTreni.Missioni.Any(missione => missione.Terminata);
+                        if (!anyfinal)
+                        {
+                            Deadlock deadlock = new Deadlock();
+                            foreach (StatoMissione missione in statoTreni.Missioni)
+                            {
+                                deadlock.Positions.Add(missione.CurrentStep);
+                                deadlock.Bloccati.Add(missione.Trn);
+                            }
+                            deadlocks.Add(deadlock);
+                        }
                     }
                 }
                 else if (final)
                 {
                     statoFinaleRaggiungibile = true;
                 }
-            }            
+            }
         }
 
         /// <summary>
