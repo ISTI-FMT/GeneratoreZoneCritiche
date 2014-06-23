@@ -10,7 +10,7 @@ namespace GestioneAreeCritiche.ModelChecking
 {
     class TrovaDeadlock
     {
-        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, HashSet<StatoTreni> visitati, List<IAreaCritica> aree, out bool statoFinaleRaggiungibile, List<Deadlock> deadlocks)
+        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, HashSet<StatoTreni> visitati, List<IAreaCritica> aree, out bool statoFinaleRaggiungibile, List<Deadlock> deadlockDaEvitare, List<Deadlock> deadlockTrovati)
         {
             statoFinaleRaggiungibile = false;
 
@@ -28,9 +28,7 @@ namespace GestioneAreeCritiche.ModelChecking
                 cdbs.Add(cdbCorrente);
             }
 
-            string listacdb = string.Join(",", cdbs);
-            
-            
+            string listacdb = string.Join(",", cdbs);            
             
             bool cannotAdvance = true;
             //bool bloccoArea = false;
@@ -90,6 +88,30 @@ namespace GestioneAreeCritiche.ModelChecking
 
                 if (evolving)
                 {
+                    StatoTreni stato2 = statoTreni.Clone();
+                    stato2.Missioni[i].MoveNext();
+
+                    foreach (Deadlock deadlock in deadlockDaEvitare)
+                    {
+                        if (deadlock.VerificaDeadlock(stato2))
+                        {
+                            Console.WriteLine(listacdb + ": " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " Evoluzione bloccata da deadlock noto"); 
+                            evolving = false;
+
+                            Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(stato2, statoAree, false);
+
+                            if (liveness != null)
+                            {
+                                string azioniAree = string.Join(",", missione.AzioniCdb[missione.CurrentStep + 1]);
+                                Console.WriteLine(listacdb + ": FALSO POSITIVO: deadlock noto blocca il movimento " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " azioni: [" + azioniAree + "]");
+                            }
+
+                        }
+                    }
+                }
+
+                if (evolving)
+                {
                     //Console.WriteLine(listacdb + ": " + missione.Trn + " Entrata: " + cdbCorrente + "=>" + cdbNext);
 
                     cannotAdvance = false;
@@ -102,7 +124,7 @@ namespace GestioneAreeCritiche.ModelChecking
 
                     //se esiste un path che porta alla fine non vado oltre
                     bool statoFinaleRaggiunto;
-                    Trova(stato2, aree2, visitati, aree, out statoFinaleRaggiunto, deadlocks);
+                    Trova(stato2, aree2, visitati, aree, out statoFinaleRaggiunto, deadlockDaEvitare, deadlockTrovati);
 
                     if (statoFinaleRaggiunto)
                     {
@@ -124,10 +146,16 @@ namespace GestioneAreeCritiche.ModelChecking
                         Deadlock deadlock = new Deadlock();
                         foreach (StatoMissione missioneDeadlock in statoTreni.Missioni)
                         {
-                            deadlock.Positions.Add(missioneDeadlock.CurrentStep);
+                            int cdb = missioneDeadlock.Cdbs[missioneDeadlock.CurrentStep];
+                            if (statoAree.InArea(cdb))
+                            {
+                                deadlock.AggiungiPosizione(missioneDeadlock.Trn, cdb);
+                            }
                         }
-                        deadlock.Bloccati = bloccati;
-                        deadlocks.Add(deadlock);
+                        if (deadlock.Positions.Count > 0)
+                        {
+                            deadlockTrovati.Add(deadlock);
+                        }
                     }
                 }
             }
@@ -163,10 +191,16 @@ namespace GestioneAreeCritiche.ModelChecking
                             Deadlock deadlock = new Deadlock();
                             foreach (StatoMissione missione in statoTreni.Missioni)
                             {
-                                deadlock.Positions.Add(missione.CurrentStep);
-                                deadlock.Bloccati.Add(missione.Trn);
+                                int cdb = missione.Cdbs[missione.CurrentStep];
+                                if (statoAree.InArea(cdb))
+                                {
+                                    deadlock.AggiungiPosizione(missione.Trn, cdb);
+                                }
                             }
-                            deadlocks.Add(deadlock);
+                            if (deadlock.Positions.Count > 0)
+                            {
+                                deadlockTrovati.Add(deadlock);
+                            }
                         }
                     }
                 }
@@ -183,13 +217,30 @@ namespace GestioneAreeCritiche.ModelChecking
         /// </summary>
         /// <param name="stato">lo stato dei treni</param>
         /// <param name="sequenza">sequenza dei movimenti effettuati dai treni (contiene i TRN dei treni mossi)</param>
-        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, out bool statoFinaleRaggiungibile, out List<Deadlock> deadlocks)
+        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, out bool statoFinaleRaggiungibile, out List<Deadlock> deadlockTrovati)
         {
-            HashSet<StatoTreni> visitati = new HashSet<StatoTreni>();
+            deadlockTrovati = new List<Deadlock>();
+            List<Deadlock> deadlockDaEvitare = new List<Deadlock>();
 
-            List<IAreaCritica> aree = new List<IAreaCritica>();
-            deadlocks = new List<Deadlock>();
-            TrovaDeadlock.Trova(statoTreni, statoAree, visitati, aree, out statoFinaleRaggiungibile, deadlocks);
+            int contatoreIterazioni = 1;
+            do
+            {
+                Console.WriteLine();
+                Console.WriteLine("Iterazione " + contatoreIterazioni + "...");
+
+                deadlockDaEvitare.AddRange(deadlockTrovati);
+                deadlockTrovati = new List<Deadlock>();
+
+                HashSet<StatoTreni> visitati = new HashSet<StatoTreni>();
+                List<IAreaCritica> aree = new List<IAreaCritica>();
+                TrovaDeadlock.Trova(statoTreni.Clone(), statoAree.Clone(), visitati, aree, out statoFinaleRaggiungibile, deadlockDaEvitare, deadlockTrovati);
+
+                Console.WriteLine("Iterazione {0} terminata. Trovati  {1} nuovi deadlock", contatoreIterazioni, deadlockTrovati.Count);
+                contatoreIterazioni++;
+
+            } while (deadlockTrovati.Count > 0);
+
+            deadlockTrovati = deadlockDaEvitare;
         }
 
         public static void Trova(DatiAree dati, out bool statoFinaleRaggiungibile, out List<Deadlock> deadlocks)

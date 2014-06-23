@@ -15,6 +15,24 @@ namespace GestioneAreeCritiche.ModelChecking
             Aree = new List<IAreaCritica>();
         }
 
+        /// <summary>
+        /// Ritorna TRUE se il cdb fa parte di almeno una area critica
+        /// </summary>
+        public bool InArea(int cdb)
+        {
+            bool res = false;
+
+            foreach (IAreaCritica area in Aree)
+            {
+                if (area.ListaCdb.Contains(cdb))
+                {
+                    res = true;
+                    break;
+                }
+            }
+            return res;
+        }
+
         public bool EntrataPermessa(StatoMissione missione, int idx, int cdb)
         {
             bool entrataValida = true;

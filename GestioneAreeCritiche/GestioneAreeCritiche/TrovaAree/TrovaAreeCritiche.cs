@@ -269,14 +269,7 @@ namespace GestioneAreeCritiche.TrovaAree
             {
                 foreach (Deadlock dl in deadlocks)
                 {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < output.MissioniAnnotate.Count; i++)
-                    {
-                        MissioneAnnotata missione = output.MissioniAnnotate[i];
-                        int posizione = dl.Positions[i];
-                        sb.AppendFormat("{0}:{1} ", missione.Trn, missione.ListaCdb[posizione]);
-                    }
-                    Console.WriteLine("Deadlock: " + sb.ToString());
+                    Console.WriteLine("Deadlock: " + dl.ToString());
                 }
             }
 

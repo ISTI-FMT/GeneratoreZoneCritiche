@@ -106,20 +106,12 @@ namespace GestioneAreeCritiche
                         TrovaDeadlock.Trova(dati, out statoFinaleRaggiunto, out deadlock);
 
                         Console.WriteLine();
+                        Console.WriteLine("Deadlock identificati:");
                         if (deadlock.Count > 0)
                         {
                             foreach (Deadlock dl in deadlock)
                             {
-                                StringBuilder sb = new StringBuilder();
-                                for (int i = 0; i < dati.MissioniAnnotate.Count; i++)
-                                {
-                                    MissioneAnnotata missione = dati.MissioniAnnotate[i];
-                                    int posizione = dl.Positions[i];
-                                    sb.AppendFormat("{0}:{1} ", missione.Trn, missione.ListaCdb[posizione]);
-                                }
-
-                                string treniBloccati = string.Join(",", dl.Bloccati);
-                                Console.WriteLine("Deadlock: " + sb.ToString() + " Bloccati: " + treniBloccati);
+                                Console.WriteLine(dl.ToString());
                             }
                         }
                         else
