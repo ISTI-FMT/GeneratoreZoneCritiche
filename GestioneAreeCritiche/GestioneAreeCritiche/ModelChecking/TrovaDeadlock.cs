@@ -105,7 +105,6 @@ namespace GestioneAreeCritiche.ModelChecking
                                 string azioniAree = string.Join(",", missione.AzioniCdb[missione.CurrentStep + 1]);
                                 Console.WriteLine(listacdb + ": FALSO POSITIVO: deadlock noto blocca il movimento " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " azioni: [" + azioniAree + "]");
                             }
-
                         }
                     }
                 }
@@ -133,32 +132,33 @@ namespace GestioneAreeCritiche.ModelChecking
                 }
             }
 
-            if (bloccati.Count > 0)
-            {
-                //
-
-                bool anyfinal = statoTreni.Missioni.Any(missione => missione.Terminata);
-                if (!anyfinal)
-                {
-                    Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(statoTreni, statoAree, false);
-                    if (liveness == null)
-                    {
-                        Deadlock deadlock = new Deadlock();
-                        foreach (StatoMissione missioneDeadlock in statoTreni.Missioni)
-                        {
-                            int cdb = missioneDeadlock.Cdbs[missioneDeadlock.CurrentStep];
-                            if (statoAree.InArea(cdb))
-                            {
-                                deadlock.AggiungiPosizione(missioneDeadlock.Trn, cdb);
-                            }
-                        }
-                        if (deadlock.Positions.Count > 0)
-                        {
-                            deadlockTrovati.Add(deadlock);
-                        }
-                    }
-                }
-            }
+            //if (bloccati.Count > 0)
+            //{
+            //    bool anyfinal = statoTreni.Missioni.Any(missione => missione.Terminata);
+            //    if (!anyfinal)
+            //    {
+            //        Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(statoTreni, statoAree, false);
+            //        if (liveness == null)
+            //        {
+            //            Deadlock deadlock = new Deadlock();
+            //            foreach (StatoMissione missioneDeadlock in statoTreni.Missioni)
+            //            {
+            //                int cdb = missioneDeadlock.Cdbs[missioneDeadlock.CurrentStep];
+            //                if (statoAree.InArea(cdb))
+            //                {
+            //                    deadlock.AggiungiPosizione(missioneDeadlock.Trn, cdb);
+            //                }
+            //            }
+            //            if (deadlock.Positions.Count > 0)
+            //            {
+            //                if (!deadlockTrovati.Contains(deadlock))
+            //                {
+            //                    deadlockTrovati.Add(deadlock);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
 
             if (cannotAdvance)
             {
@@ -168,26 +168,26 @@ namespace GestioneAreeCritiche.ModelChecking
 
                 if (!final)
                 {
-                    //se nessun movimento è permesso a causa delle aree critiche, non significa che sono in un deadlock
-                    bool nessunaPermessa = true;
-                    foreach (StatoMissione missione in statoTreni.Missioni)
-                    {
-                        if (!missione.Terminata)
-                        {
-                            int cdbNext = missione.Cdbs[missione.CurrentStep + 1];
-                            if (statoAree.EntrataPermessa(missione, missione.CurrentStep + 1, cdbNext))
-                            {
-                                nessunaPermessa = false;
-                                break;
-                            }
-                        }
-                    }
+                    ////se nessun movimento è permesso a causa delle aree critiche, non significa che sono in un deadlock
+                    //bool nessunaPermessa = true;
+                    //foreach (StatoMissione missione in statoTreni.Missioni)
+                    //{
+                    //    if (!missione.Terminata)
+                    //    {
+                    //        int cdbNext = missione.Cdbs[missione.CurrentStep + 1];
+                    //        if (statoAree.EntrataPermessa(missione, missione.CurrentStep + 1, cdbNext))
+                    //        {
+                    //            nessunaPermessa = false;
+                    //            break;
+                    //        }
+                    //    }
+                    //}
 
-                    if (!nessunaPermessa)
-                    {
-                        bool anyfinal = statoTreni.Missioni.Any(missione => missione.Terminata);
-                        if (!anyfinal)
-                        {
+                    //if (!nessunaPermessa)
+                    //{
+                    //    bool anyfinal = statoTreni.Missioni.Any(missione => missione.Terminata);
+                    //    if (!anyfinal)
+                    //    {
                             Deadlock deadlock = new Deadlock();
                             foreach (StatoMissione missione in statoTreni.Missioni)
                             {
@@ -199,10 +199,13 @@ namespace GestioneAreeCritiche.ModelChecking
                             }
                             if (deadlock.Positions.Count > 0)
                             {
-                                deadlockTrovati.Add(deadlock);
+                                if (!deadlockTrovati.Contains(deadlock))
+                                {
+                                    deadlockTrovati.Add(deadlock);
+                                }
                             }
-                        }
-                    }
+                    //    }
+                    //}
                 }
                 else if (final)
                 {

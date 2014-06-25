@@ -26,6 +26,18 @@ namespace GestioneAreeCritiche
             Console.Read();
         }
 
+        private static bool IsNewDeadlock(List<Deadlock> deadlocks, Deadlock deadlock)
+        {
+            foreach(Deadlock dl in deadlocks)
+            {
+                if (dl != deadlock && deadlock.IsSubDeadlock(dl))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private static void Main(string[] args)
         {
             Console.WriteLine();
@@ -111,14 +123,16 @@ namespace GestioneAreeCritiche
                         {
                             foreach (Deadlock dl in deadlock)
                             {
-                                Console.WriteLine(dl.ToString());
+                                if (IsNewDeadlock(deadlock, dl))
+                                {
+                                    Console.WriteLine(dl.ToString());
+                                }
                             }
                         }
                         else
                         {
                             Console.WriteLine("Nessun Deadlock trovato");
                         }
-
                         break;
                     }
                 default:

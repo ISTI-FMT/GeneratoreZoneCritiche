@@ -49,5 +49,30 @@ namespace GestioneAreeCritiche.ModelChecking
         {
             return string.Join(", ", Positions.Select(position => position.Key + ":" + position.Value));
         }
+
+        public override bool Equals(object obj)
+        {
+            Deadlock dl = obj as Deadlock;
+            if (dl == null)
+                return false;
+
+            return this.ToString().Equals(dl.ToString());
+        }
+
+        /// <summary>
+        /// Ritorna TRUE se il deadlock ricevuto è un sotto-deadlock dell'oggetto corrente
+        /// </summary>
+        public bool IsSubDeadlock(Deadlock deadlock2)
+        {
+            List<KeyValuePair<string, int>> lista2 = deadlock2.Positions.OrderBy(pair => pair.Key).ToList();
+            List<KeyValuePair<string, int>> lista = Positions.OrderBy(pair => pair.Key).ToList();
+
+            if (lista2.Intersect(lista).SequenceEqual(lista2))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
