@@ -264,7 +264,7 @@ namespace GestioneAreeCritiche.TrovaAree
             bool statoFinaleRaggiungibile;
             List<Deadlock> deadlocks;
             TrovaDeadlock.Trova(output, out statoFinaleRaggiungibile, out deadlocks);
-
+            output.DeadlockConosciuti = deadlocks;
             if (deadlocks.Count > 0)
             {
                 foreach (Deadlock dl in deadlocks)

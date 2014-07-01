@@ -26,18 +26,6 @@ namespace GestioneAreeCritiche
             Console.Read();
         }
 
-        private static bool IsNewDeadlock(List<Deadlock> deadlocks, Deadlock deadlock)
-        {
-            foreach(Deadlock dl in deadlocks)
-            {
-                if (dl != deadlock && deadlock.IsSubDeadlock(dl))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         private static void Main(string[] args)
         {
             Console.WriteLine();
@@ -111,22 +99,43 @@ namespace GestioneAreeCritiche
                         }
                         dati = TrovaAreeCritiche.GeneraStrutturaOutput(areeLineari, areeCircolari, missioni);
 
+                        //-----------------------
+                        //Identifico deadlock
 
                         bool statoFinaleRaggiunto;
                         List<Deadlock> deadlock;
                         //Trovo la lista dei deadlock che possono verificarsi
                         TrovaDeadlock.Trova(dati, out statoFinaleRaggiunto, out deadlock);
 
-                        Console.WriteLine();
                         Console.WriteLine("Deadlock identificati:");
                         if (deadlock.Count > 0)
                         {
+                            //-------stampa in versione CVS
+                            //foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
+                            //{
+                            //    Console.Write(missione.Trn);
+                            //    Console.Write(",");
+                            //}
+                            //Console.WriteLine();
+                            //Console.WriteLine();
+
+                            //foreach (Deadlock dl in deadlock)
+                            //{
+                            //    foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
+                            //    {
+                            //        int pos = dl.Getposition(missione.Trn);
+                            //        if (pos != -1)
+                            //            Console.Write(pos);
+                            //        Console.Write(",");
+                            //    }
+                            //    Console.WriteLine();
+                            //}
+                            //-------
+
+                            Console.WriteLine();
                             foreach (Deadlock dl in deadlock)
                             {
-                                if (IsNewDeadlock(deadlock, dl))
-                                {
-                                    Console.WriteLine(dl.ToString());
-                                }
+                               Console.WriteLine(dl.ToString());
                             }
                         }
                         else

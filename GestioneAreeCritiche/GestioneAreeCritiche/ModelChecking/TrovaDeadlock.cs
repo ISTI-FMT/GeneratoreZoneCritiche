@@ -97,7 +97,6 @@ namespace GestioneAreeCritiche.ModelChecking
                         {
                             Console.WriteLine(listacdb + ": " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " Evoluzione bloccata da deadlock noto"); 
                             evolving = false;
-
                             Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(stato2, statoAree, false);
 
                             if (liveness != null)
@@ -105,6 +104,8 @@ namespace GestioneAreeCritiche.ModelChecking
                                 string azioniAree = string.Join(",", missione.AzioniCdb[missione.CurrentStep + 1]);
                                 Console.WriteLine(listacdb + ": FALSO POSITIVO: deadlock noto blocca il movimento " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " azioni: [" + azioniAree + "]");
                             }
+
+                            break;
                         }
                     }
                 }
@@ -199,7 +200,7 @@ namespace GestioneAreeCritiche.ModelChecking
                             }
                             if (deadlock.Positions.Count > 0)
                             {
-                                if (!deadlockTrovati.Contains(deadlock))
+                                if (!deadlockTrovati.Contains(deadlock) && !deadlockDaEvitare.Contains(deadlock))
                                 {
                                     deadlockTrovati.Add(deadlock);
                                 }
@@ -276,53 +277,45 @@ namespace GestioneAreeCritiche.ModelChecking
             //    break;
 
             TrovaDeadlock.Trova(statoTreni, statoAree, out statoFinaleRaggiungibile, out deadlocks);
+
+
+            Console.WriteLine();
+            Console.WriteLine("Riduzione...");
+
+            //Elimino i deadlock che possono essere ridotti ad un caso più semplice
+            List<Deadlock> deadlockRidotti = new List<Deadlock>();
+            foreach (Deadlock dl in deadlocks)
+            {
+                Deadlock padre;
+                if (IsNewDeadlock(deadlocks, dl, out padre))
+                {
+                    deadlockRidotti.Add(dl);
+                }
+                else
+                {
+                    Console.WriteLine("Deadlock Ridotto: {0} => {1}", dl, padre);
+                }
+            }
+            deadlocks = deadlockRidotti;
+        }
+        
+        /// <summary>
+        /// Ritorna TRUE se il deadlock passato non è un caso più specifico di altri deadlock nella lista
+        /// </summary>
+        private static bool IsNewDeadlock(List<Deadlock> deadlocks, Deadlock deadlock, out Deadlock padre)
+        {
+            padre = null;
+            foreach (Deadlock dl in deadlocks)
+            {
+                if (dl != deadlock && deadlock.IsSubDeadlock(dl))
+                {
+                    padre = dl;
+                    return false;
+                }
+            }
+            return true;
         }
 
-        //private static void AggiungiAreaLineare(List<IAreaCritica> aree, string trenoA, string trenoB, List<int> area)
-        //{
-        //    //Cerco se esiste già un'area con la stessa sequenza
-        //    IAreaCritica areaLineare = aree.Find(arealista => arealista.ListaCdb.SequenceEqual(area));
 
-        //    if (areaLineare == null)
-        //    {
-        //        //Cerco se l'area esiste già ma è stata trovata nel senso opposto.
-        //        //NOTA: In questo caso A e B si inseriscono nell'ordine inverso (B a sinistra, A a destra)
-        //        //per rispettare l'ordine dell'area originale
-        //        List<int> areaReverse = area.ToList();
-        //        areaReverse.Reverse();
-
-        //        areaLineare = aree.Find(arealista => arealista.ListaCdb.SequenceEqual(areaReverse));
-
-        //        if (areaLineare == null)
-        //        {
-        //            AreaCriticaLineare acl = new AreaCriticaLineare(area);
-        //            acl.TreniSinistra.Add(trenoA);
-        //            acl.TreniDestra.Add(trenoB);
-        //            aree.Add(acl);
-        //        }
-        //        else
-        //        {
-        //            if (!areaLineare.TreniSinistra.Contains(trenoB))
-        //            {
-        //                areaLineare.TreniSinistra.Add(trenoB);
-        //            }
-        //            if (!areaLineare.TreniDestra.Contains(trenoA))
-        //            {
-        //                areaLineare.TreniDestra.Add(trenoA);
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (!areaLineare.TreniSinistra.Contains(trenoA))
-        //        {
-        //            areaLineare.TreniSinistra.Add(trenoA);
-        //        }
-        //        if (!areaLineare.TreniDestra.Contains(trenoB))
-        //        {
-        //            areaLineare.TreniDestra.Add(trenoB);
-        //        }
-        //    }
-        //}
     }
 }

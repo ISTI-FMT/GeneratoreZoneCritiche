@@ -87,6 +87,7 @@ namespace GestioneAreeCritiche.ParserConfigurazioneATS
             foreach (int treno in missioni.Keys)
             {
                 missioniList.Add(new MissioneTreno(treno.ToString(), missioni[treno]));
+                Console.WriteLine("{0}: {1}", treno, string.Join(",", missioni[treno]));
             }
 
             TrovaAreeCritiche.Trova(missioniList, "AreeCritiche");

@@ -5,12 +5,25 @@ using System.Text;
 
 namespace GestioneAreeCritiche.ModelChecking
 {
-    internal class Deadlock
+    public class Deadlock
     {
         public List<KeyValuePair<string, int>> Positions { get; private set; }
         public Deadlock()
         {
             Positions = new List<KeyValuePair<string, int>>();
+        }
+
+        public int Getposition(string trn)
+        {
+            KeyValuePair<string, int>  found = Positions.FirstOrDefault(pair => pair.Key == trn);
+            if (found.Key == null)
+            {
+                return -1;
+            }
+            else
+            {
+                return found.Value;
+            }
         }
 
         public void AggiungiPosizione(string trn, int cdb)

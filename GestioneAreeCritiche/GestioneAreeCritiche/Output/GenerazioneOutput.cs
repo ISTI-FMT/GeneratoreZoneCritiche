@@ -3,6 +3,8 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using GestioneAreeCritiche.AreeCritiche;
+using GestioneAreeCritiche.ModelChecking;
+using System.Collections.Generic;
 
 namespace GestioneAreeCritiche.Output
 {
@@ -144,6 +146,21 @@ namespace GestioneAreeCritiche.Output
 
                     writer.WriteEndElement();
 
+                }
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement(); //missioni
+
+            writer.WriteStartElement("Deadlocks");
+            foreach(Deadlock deadlock in output.DeadlockConosciuti)
+            {
+                writer.WriteStartElement("Deadlock");
+                foreach (KeyValuePair<string,int> posizione in deadlock.Positions)
+                {
+                    writer.WriteStartElement("Posizione");
+                    writer.WriteAttributeString("TRN", posizione.Key);
+                    writer.WriteAttributeString("CDB", posizione.Value.ToString());
+                    writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
             }

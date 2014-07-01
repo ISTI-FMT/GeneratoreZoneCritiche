@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using GestioneAreeCritiche.AreeCritiche;
+using GestioneAreeCritiche.ModelChecking;
 
 namespace GestioneAreeCritiche.Output
 {
@@ -14,5 +15,7 @@ namespace GestioneAreeCritiche.Output
         public List<IAreaCritica> AreeCritiche { get; set; }
 
         public List<MissioneAnnotata> MissioniAnnotate { get; private set; }
+
+        public List<Deadlock> DeadlockConosciuti { get; set; }
     }
 }
