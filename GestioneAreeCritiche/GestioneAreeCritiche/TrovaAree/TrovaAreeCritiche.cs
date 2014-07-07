@@ -251,19 +251,16 @@ namespace GestioneAreeCritiche.TrovaAree
             }
 
             Console.WriteLine("-------");
-            Console.WriteLine("Ricerca di deadlock....");
+            Console.WriteLine("Identifying Deadlocks....");
             Console.WriteLine();
             DatiAree output;
 
 
-            //bool fine = false;
-            //do
-            //{
             output = GeneraStrutturaOutput(areeLineari, areeCircolari, missioni);
 
             bool statoFinaleRaggiungibile;
             List<Deadlock> deadlocks;
-            TrovaDeadlock.Trova(output, out statoFinaleRaggiungibile, out deadlocks);
+            TrovaDeadlock.Trova(output, out statoFinaleRaggiungibile, out deadlocks, false);
             output.DeadlockConosciuti = deadlocks;
             if (deadlocks.Count > 0)
             {
@@ -273,23 +270,21 @@ namespace GestioneAreeCritiche.TrovaAree
                 }
             }
 
-            //    fine = deadlocks.Count == 0;
-
-            //} while (!fine);
 
             Console.WriteLine("-------");
-            Console.WriteLine("Generazione dell'output....");
-            Console.WriteLine();
+            Console.WriteLine("Generating Output....");
 
             //Scrivo l'output sulla console
-            GenerazioneOutput.ToConsoleOutput(output);
+            //GenerazioneOutput.ToConsoleOutput(output);
 
             //Generazione output per UMC
             string outfile = Path.GetFileNameWithoutExtension(outFilename) + ".umc";
+            Console.WriteLine("Generating {0}", outfile);
             GenerazioneOutput.ToUmc(output, outfile);
 
             //Generazione output XML
             outfile = Path.GetFileNameWithoutExtension(outFilename) + ".xml";
+            Console.WriteLine("Generating {0}", outfile);
             GenerazioneOutput.ToXml(output, outfile);
         }
 

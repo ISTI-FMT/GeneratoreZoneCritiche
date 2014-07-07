@@ -32,7 +32,7 @@ namespace GestioneAreeCritiche.Output
             }
             catch (Exception)
             {
-                Console.WriteLine("Errore: Impossibile scrivere sul file " + outfile);
+                Console.WriteLine("Error: Cannot write to file: " + outfile);
                 return;
             }
 

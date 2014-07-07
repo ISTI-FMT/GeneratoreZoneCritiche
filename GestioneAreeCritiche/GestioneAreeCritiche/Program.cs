@@ -21,13 +21,14 @@ namespace GestioneAreeCritiche
             Console.WriteLine("GestioneAreeCritiche -t <nomefile.txt> \t Trova le aree critiche nelle missioni elencate nel file e genera i file nomefile.xml e nomefile.umc");
             Console.WriteLine("GestioneAreeCritiche -x \t Trova le aree critiche nei file TabellaOrario.xml e ConfigurazioneItinerari.xml e genera i file AreeCritiche.xml e AreeCritiche.umc");
             Console.WriteLine("GestioneAreeCritiche -c <nomefile.umc>|<nomefile.xml> \t Converte un file da formato umc a xml e viceversa");
-            Console.WriteLine("GestioneAreeCritiche -d <nomefile.umc> \t Trova i deadlock che possono verificarsi");
+            Console.WriteLine("GestioneAreeCritiche -d <nomefile.umc> (-ignoraAree) \t Trova i deadlock che possono verificarsi. Se ignoraAree è settato, trova i deadlock ignorando i controlli di entrata nelle aree critiche");
             Console.WriteLine("Press any key to exit...");
             Console.Read();
-        }
+        }        
 
         private static void Main(string[] args)
         {
+            DateTime start = DateTime.Now;
             Console.WriteLine();
 
             if (args.Length == 0)
@@ -46,6 +47,12 @@ namespace GestioneAreeCritiche
                             return;
                         }
                         string filename = args[1];
+                        if (!File.Exists(filename))
+                        {
+                            Console.WriteLine("File {0} does not exist", filename);
+                            return;
+                        }
+                        
                         TrovaAreeCritiche.Trova(filename);
                         break;
                     }
@@ -62,6 +69,11 @@ namespace GestioneAreeCritiche
                             return;
                         }
                         string filename = args[1];
+                        if (!File.Exists(filename))
+                        {
+                            Console.WriteLine("File {0} does not exist", filename);
+                            return;
+                        }
                         Convertitore.Converti(filename);
                         break;
                     }
@@ -74,6 +86,22 @@ namespace GestioneAreeCritiche
                         }
 
                         string filename = args[1];
+                        if (!File.Exists(filename))
+                        {
+                            Console.WriteLine("File {0} does not exist", filename);
+                            return;
+                        }
+
+                        bool ignoraAree = false;
+                        if (args.Length > 2)
+                        {
+                            if (string.Equals(args[2],"-ignoraAree", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                ignoraAree = true;
+                            }
+                        }
+
+
                         DatiAree dati = UmcParser.ParseUmc(filename);
 
                         //Ricalcolo quali sono le aree circolari e quali le lineari
@@ -105,9 +133,9 @@ namespace GestioneAreeCritiche
                         bool statoFinaleRaggiunto;
                         List<Deadlock> deadlock;
                         //Trovo la lista dei deadlock che possono verificarsi
-                        TrovaDeadlock.Trova(dati, out statoFinaleRaggiunto, out deadlock);
+                        TrovaDeadlock.Trova(dati, out statoFinaleRaggiunto, out deadlock, ignoraAree);
 
-                        Console.WriteLine("Deadlock identificati:");
+                        Console.WriteLine("Identified Deadlocks:");
                         if (deadlock.Count > 0)
                         {
                             //-------stampa in versione CVS
@@ -140,7 +168,7 @@ namespace GestioneAreeCritiche
                         }
                         else
                         {
-                            Console.WriteLine("Nessun Deadlock trovato");
+                            Console.WriteLine("No deadlock found");
                         }
                         break;
                     }
@@ -149,7 +177,12 @@ namespace GestioneAreeCritiche
                     break;
             }
 
+            DateTime end = DateTime.Now;
+
+            TimeSpan elapsedTime = end - start;
+
             Console.WriteLine();
+            Console.WriteLine("Elapsed time: {0}s", elapsedTime.TotalSeconds);
             Console.WriteLine("Press any key to exit...");
             Console.Read();
         }

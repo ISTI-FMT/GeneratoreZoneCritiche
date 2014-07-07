@@ -12,7 +12,7 @@ namespace GestioneAreeCritiche.Conversione
             DatiAree strutturaOutput = UmcParser.ParseUmc(sourceFile);
             
             string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".xml";
-            Console.WriteLine("Generazione XML...");
+            Console.WriteLine("Generating XML...");
             GenerazioneOutput.ToXml(strutturaOutput, outfile);
         }
 
@@ -22,7 +22,7 @@ namespace GestioneAreeCritiche.Conversione
             DatiAree strutturaOutput = XmlAreeParser.ParseXml(sourceFile);
 
             string outfile = Path.GetFileNameWithoutExtension(sourceFile) + ".umc";
-            Console.WriteLine("Generazione UMC...");
+            Console.WriteLine("Generating UMC...");
             GenerazioneOutput.ToUmc(strutturaOutput, outfile);
         }
 
@@ -32,7 +32,7 @@ namespace GestioneAreeCritiche.Conversione
 
             if (!File.Exists(nomefile))
             {
-                Console.WriteLine("Il file " + nomefile + " non esiste");
+                Console.WriteLine("File " + nomefile + " does not exist");
                 Program.PrintUsage();
                 return;
             }
@@ -50,7 +50,7 @@ namespace GestioneAreeCritiche.Conversione
             }
             else
             {
-                Console.WriteLine("Tipo di file non riconosciuto. Estensioni supportate .xml, .umc");
+                Console.WriteLine("Unknown file type. Supported extensions are: .xml, .umc");
             }
         }
     }

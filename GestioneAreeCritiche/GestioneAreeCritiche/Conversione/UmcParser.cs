@@ -178,15 +178,15 @@ namespace GestioneAreeCritiche.Conversione
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("Errore durante il parsing del file");
-                        Console.WriteLine("Errore:" + ex.Message);
-                        Console.WriteLine("Linea:" + line);
+                        Console.WriteLine("Error while parsing the file");
+                        Console.WriteLine("Error:" + ex.Message);
+                        Console.WriteLine("Line:" + line);
                     }
                 }
             }
             catch (IOException ex)
             {
-                Console.WriteLine("Errore durante la lettura del file: " + ex.ToString());
+                Console.WriteLine("Error while reading the file: " + ex.ToString());
             }
 
             res.MissioniAnnotate.AddRange(missioniAnnotate.Values);
