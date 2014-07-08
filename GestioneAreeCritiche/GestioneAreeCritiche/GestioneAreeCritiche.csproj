@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine">
+      <HintPath>..\packages\CommandLineParser.1.9.71\lib\net40\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -55,6 +58,7 @@
     <Compile Include="ModelChecking\StatoAree.cs" />
     <Compile Include="ModelChecking\StatoMissione.cs" />
     <Compile Include="ModelChecking\StatoTreni.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="Output\MissioneAnnotata.cs" />
     <Compile Include="MissioneTreno.cs" />
     <Compile Include="Output\GenerazioneOutput.cs" />
@@ -70,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

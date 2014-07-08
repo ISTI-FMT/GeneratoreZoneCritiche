@@ -8,17 +8,47 @@ using System.Threading.Tasks;
 
 namespace GestioneAreeCritiche.ModelChecking
 {
+    class Posizioni
+    {
+        private int[] posizioni;
+        private int hashCode;
+
+        public Posizioni(int[] posizioni)
+        {
+            this.posizioni = posizioni;
+            hashCode = string.Join(",", posizioni).GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            Posizioni stato2 = (Posizioni)obj;
+            //return posizioni.SequenceEqual(stato2.posizioni);
+            return posizioni.SequenceEqual(stato2.posizioni);
+        }
+
+        public override int GetHashCode()
+        {
+            return hashCode;
+        }
+    }
     class TrovaDeadlock
     {
-        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, HashSet<StatoTreni> visitati, List<IAreaCritica> aree, out bool statoFinaleRaggiungibile, List<Deadlock> deadlockDaEvitare, List<Deadlock> deadlockTrovati, bool ignoraAree)
+        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, HashSet<Posizioni> visitati, List<IAreaCritica> aree, out bool statoFinaleRaggiungibile, List<Deadlock> deadlockDaEvitare, List<Deadlock> deadlockTrovati, bool ignoraAree, bool ignoraFalsiPositivi)
         {
             statoFinaleRaggiungibile = false;
 
-            if (visitati.Contains(statoTreni))
+            Posizioni pos = new Posizioni(statoTreni.GetPosizioni());
+            if (visitati.Contains(pos))
             {
                 return;
             }
-            visitati.Add(statoTreni);
+            visitati.Add(pos);
+
+            if ((visitati.Count % 1000) == 0)
+            {
+                Console.Write("\r");
+                Console.Write(visitati.Count);
+            }
 
             List<int> cdbs = new List<int>();
             for (int i = 0; i < statoTreni.Missioni.Count; i++)
@@ -74,14 +104,17 @@ namespace GestioneAreeCritiche.ModelChecking
                         evolving = false;
                         //bloccoArea = true;
 
-                        StatoTreni stato2 = statoTreni.Clone();
-                        stato2.Missioni[i].MoveNext();
-                        Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(stato2, statoAree, false);
-
-                        if (liveness != null)
+                        if (!ignoraFalsiPositivi)
                         {
-                            string azioniAree = string.Join(",",missione.AzioniCdb[missione.CurrentStep + 1]);
-                            Console.WriteLine(listacdb + ": FALSE POSITIVE: Critical Area blocks movement: " +   missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " actions: [" + azioniAree + "]");
+                            StatoTreni stato2 = statoTreni.Clone();
+                            stato2.Missioni[i].MoveNext();
+                            Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(stato2, statoAree, false);
+
+                            if (liveness != null)
+                            {
+                                string azioniAree = string.Join(",", missione.AzioniCdb[missione.CurrentStep + 1]);
+                                Console.WriteLine(listacdb + ": FALSE POSITIVE: Critical Area blocks movement: " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " actions: [" + azioniAree + "]");
+                            }
                         }
                     }
                 }
@@ -97,14 +130,17 @@ namespace GestioneAreeCritiche.ModelChecking
                         {
                             //Console.WriteLine(listacdb + ": " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " Evolution blocked by known deadlock"); 
                             evolving = false;
-                            Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(stato2, statoAree, false);
 
-                            if (liveness != null)
+                            if (!ignoraFalsiPositivi)
                             {
-                                string azioniAree = string.Join(",", missione.AzioniCdb[missione.CurrentStep + 1]);
-                                Console.WriteLine(listacdb + ": FALSE POSITIVE: Known Deadlock blocks movement: " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " actions: [" + azioniAree + "]");
-                            }
+                                Stack<KeyValuePair<string, int>> liveness = LivenessCheck.CheckLiveness(stato2, statoAree, false);
 
+                                if (liveness != null)
+                                {
+                                    string azioniAree = string.Join(",", missione.AzioniCdb[missione.CurrentStep + 1]);
+                                    Console.WriteLine(listacdb + ": FALSE POSITIVE: Known Deadlock blocks movement: " + missione.Trn + ": " + cdbCorrente + "=>" + cdbNext + " actions: [" + azioniAree + "]");
+                                }
+                            }
                             break;
                         }
                     }
@@ -124,7 +160,7 @@ namespace GestioneAreeCritiche.ModelChecking
 
                     //se esiste un path che porta alla fine non vado oltre
                     bool statoFinaleRaggiunto;
-                    Trova(stato2, aree2, visitati, aree, out statoFinaleRaggiunto, deadlockDaEvitare, deadlockTrovati, ignoraAree);
+                    Trova(stato2, aree2, visitati, aree, out statoFinaleRaggiunto, deadlockDaEvitare, deadlockTrovati, ignoraAree, ignoraFalsiPositivi);
 
                     if (statoFinaleRaggiunto)
                     {
@@ -221,7 +257,7 @@ namespace GestioneAreeCritiche.ModelChecking
         /// </summary>
         /// <param name="stato">lo stato dei treni</param>
         /// <param name="sequenza">sequenza dei movimenti effettuati dai treni (contiene i TRN dei treni mossi)</param>
-        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, out bool statoFinaleRaggiungibile, out List<Deadlock> deadlockTrovati, bool ignoraAree)
+        private static void Trova(StatoTreni statoTreni, StatoAree statoAree, out bool statoFinaleRaggiungibile, out List<Deadlock> deadlockTrovati, bool ignoraAree, bool ignoraFalsiPositivi)
         {
             deadlockTrovati = new List<Deadlock>();
             List<Deadlock> deadlockDaEvitare = new List<Deadlock>();
@@ -235,9 +271,9 @@ namespace GestioneAreeCritiche.ModelChecking
                 deadlockDaEvitare.AddRange(deadlockTrovati);
                 deadlockTrovati = new List<Deadlock>();
 
-                HashSet<StatoTreni> visitati = new HashSet<StatoTreni>();
+                HashSet<Posizioni> visitati = new HashSet<Posizioni>();
                 List<IAreaCritica> aree = new List<IAreaCritica>();
-                TrovaDeadlock.Trova(statoTreni.Clone(), statoAree.Clone(), visitati, aree, out statoFinaleRaggiungibile, deadlockDaEvitare, deadlockTrovati, ignoraAree);
+                TrovaDeadlock.Trova(statoTreni.Clone(), statoAree.Clone(), visitati, aree, out statoFinaleRaggiungibile, deadlockDaEvitare, deadlockTrovati, ignoraAree, ignoraFalsiPositivi);
 
                 Console.WriteLine("{1} new deadlocks found", contatoreIterazioni, deadlockTrovati.Count);
                 contatoreIterazioni++;
@@ -247,7 +283,7 @@ namespace GestioneAreeCritiche.ModelChecking
             deadlockTrovati = deadlockDaEvitare;
         }
 
-        public static void Trova(DatiAree dati, out bool statoFinaleRaggiungibile, out List<Deadlock> deadlocks, bool ignoraAree)
+        public static void Trova(DatiAree dati, out bool statoFinaleRaggiungibile, out List<Deadlock> deadlocks, bool ignoraAree, bool ignoraFalsiPositivi)
         {
             StatoAree statoAree = new StatoAree();
             foreach (IAreaCritica area in dati.AreeCritiche)
@@ -276,7 +312,7 @@ namespace GestioneAreeCritiche.ModelChecking
             //if (fine)
             //    break;
 
-            TrovaDeadlock.Trova(statoTreni, statoAree, out statoFinaleRaggiungibile, out deadlocks, ignoraAree);
+            TrovaDeadlock.Trova(statoTreni, statoAree, out statoFinaleRaggiungibile, out deadlocks, ignoraAree, ignoraFalsiPositivi);
 
 
             Console.WriteLine();
@@ -298,7 +334,8 @@ namespace GestioneAreeCritiche.ModelChecking
             }
 
             Console.WriteLine();
-            Console.WriteLine("Identified Deadlocks: {0}", deadlockRidotti.Count);
+            Console.WriteLine("Deadlocks: {0}", deadlocks.Count);
+            Console.WriteLine("Deadlocks after reduction: {0}", deadlockRidotti.Count);
             Console.WriteLine();
             deadlocks = deadlockRidotti;
         }

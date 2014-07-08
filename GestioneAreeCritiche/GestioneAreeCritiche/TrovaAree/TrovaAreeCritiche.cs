@@ -211,7 +211,7 @@ namespace GestioneAreeCritiche.TrovaAree
             return res;
         }
 
-        internal static void Trova(List<MissioneTreno> missioni, string outFilename)
+        internal static void Trova(List<MissioneTreno> missioni, string outFilename, bool ignoraFalsiPositivi)
         {
             //------- aree lineari
             List<AreaCriticaLineare> areeLineari = RicercaAreeLineari.Ricerca(missioni);
@@ -260,7 +260,7 @@ namespace GestioneAreeCritiche.TrovaAree
 
             bool statoFinaleRaggiungibile;
             List<Deadlock> deadlocks;
-            TrovaDeadlock.Trova(output, out statoFinaleRaggiungibile, out deadlocks, false);
+            TrovaDeadlock.Trova(output, out statoFinaleRaggiungibile, out deadlocks, false, ignoraFalsiPositivi);
             output.DeadlockConosciuti = deadlocks;
             if (deadlocks.Count > 0)
             {
@@ -288,11 +288,11 @@ namespace GestioneAreeCritiche.TrovaAree
             GenerazioneOutput.ToXml(output, outfile);
         }
 
-        internal static void Trova(string nomefile)
+        internal static void Trova(string nomefile, bool ignoraFalsiPositivi)
         {
             List<MissioneTreno> missioni = CaricaMissioni(nomefile);
 
-            Trova(missioni, nomefile);
+            Trova(missioni, nomefile, ignoraFalsiPositivi);
         }
     }
 }

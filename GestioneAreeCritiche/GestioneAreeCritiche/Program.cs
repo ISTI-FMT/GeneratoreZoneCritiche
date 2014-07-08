@@ -31,150 +31,112 @@ namespace GestioneAreeCritiche
             DateTime start = DateTime.Now;
             Console.WriteLine();
 
-            if (args.Length == 0)
+            var options = new Options();
+            if (CommandLine.Parser.Default.ParseArguments(args, options))
             {
-                PrintUsage();
-                return;
-            }
-
-            switch (args[0])
-            {
-                case "-t":
+                if (options.Aree != null)
+                {
+                    string filename = options.Aree;
+                    if (!File.Exists(filename))
                     {
-                        if (args.Length < 2)
-                        {
-                            PrintUsage();
-                            return;
-                        }
-                        string filename = args[1];
-                        if (!File.Exists(filename))
-                        {
-                            Console.WriteLine("File {0} does not exist", filename);
-                            return;
-                        }
-                        
-                        TrovaAreeCritiche.Trova(filename);
-                        break;
+                        Console.WriteLine("File {0} does not exist", filename);
+                        return;
                     }
-                case "-x":
+
+                    TrovaAreeCritiche.Trova(filename, options.IgnoraFalsiPositivi);
+                }
+                else if (options.Deadlock != null)
+                {
+                    string filename = options.Deadlock;
+                    if (!File.Exists(filename))
                     {
-                        ParserATS.Parse();
-                        break;
+                        Console.WriteLine("File {0} does not exist", filename);
+                        return;
                     }
-                case "-c":
+                    
+                    DatiAree dati = UmcParser.ParseUmc(filename);
+
+                    //Ricalcolo quali sono le aree circolari e quali le lineari
+                    //allo scopo di ricalcolare le missioni annotate
+                    //In questo modo è possibile modificare il file UMC senza aggiornare a mano le annotazioni
+                    List<AreaCriticaLineare> areeLineari = new List<AreaCriticaLineare>();
+                    List<AreaCriticaCircolare> areeCircolari = new List<AreaCriticaCircolare>();
+                    List<MissioneTreno> missioni = new List<MissioneTreno>();
+                    foreach (IAreaCritica area in dati.AreeCritiche)
                     {
-                        if (args.Length < 2)
+                        if (area is AreaCriticaCircolare)
                         {
-                            PrintUsage();
-                            return;
+                            areeCircolari.Add((AreaCriticaCircolare)area);
                         }
-                        string filename = args[1];
-                        if (!File.Exists(filename))
+                        if (area is AreaCriticaLineare)
                         {
-                            Console.WriteLine("File {0} does not exist", filename);
-                            return;
+                            areeLineari.Add((AreaCriticaLineare)area);
                         }
-                        Convertitore.Converti(filename);
-                        break;
                     }
-                case "-d":
+                    foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
                     {
-                        if (args.Length < 2)
-                        {
-                            PrintUsage();
-                            return;
-                        }
-
-                        string filename = args[1];
-                        if (!File.Exists(filename))
-                        {
-                            Console.WriteLine("File {0} does not exist", filename);
-                            return;
-                        }
-
-                        bool ignoraAree = false;
-                        if (args.Length > 2)
-                        {
-                            if (string.Equals(args[2],"-ignoraAree", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                ignoraAree = true;
-                            }
-                        }
-
-
-                        DatiAree dati = UmcParser.ParseUmc(filename);
-
-                        //Ricalcolo quali sono le aree circolari e quali le lineari
-                        //allo scopo di ricalcolare le missioni annotate
-                        //In questo modo è possibile modificare il file UMC senza aggiornare a mano le annotazioni
-                        List<AreaCriticaLineare> areeLineari = new List<AreaCriticaLineare>();
-                        List<AreaCriticaCircolare> areeCircolari = new List<AreaCriticaCircolare>();
-                        List<MissioneTreno> missioni = new List<MissioneTreno>();
-                        foreach (IAreaCritica area in dati.AreeCritiche)
-                        {
-                            if (area is AreaCriticaCircolare)
-                            {
-                                areeCircolari.Add((AreaCriticaCircolare)area);
-                            }
-                            if (area is AreaCriticaLineare)
-                            {
-                                areeLineari.Add((AreaCriticaLineare)area);
-                            }
-                        }
-                        foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
-                        {
-                            missioni.Add(new MissioneTreno(missione.Trn, missione.ListaCdb));
-                        }
-                        dati = TrovaAreeCritiche.GeneraStrutturaOutput(areeLineari, areeCircolari, missioni);
-
-                        //-----------------------
-                        //Identifico deadlock
-
-                        bool statoFinaleRaggiunto;
-                        List<Deadlock> deadlock;
-                        //Trovo la lista dei deadlock che possono verificarsi
-                        TrovaDeadlock.Trova(dati, out statoFinaleRaggiunto, out deadlock, ignoraAree);
-
-                        Console.WriteLine("Identified Deadlocks:");
-                        if (deadlock.Count > 0)
-                        {
-                            //-------stampa in versione CVS
-                            //foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
-                            //{
-                            //    Console.Write(missione.Trn);
-                            //    Console.Write(",");
-                            //}
-                            //Console.WriteLine();
-                            //Console.WriteLine();
-
-                            //foreach (Deadlock dl in deadlock)
-                            //{
-                            //    foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
-                            //    {
-                            //        int pos = dl.Getposition(missione.Trn);
-                            //        if (pos != -1)
-                            //            Console.Write(pos);
-                            //        Console.Write(",");
-                            //    }
-                            //    Console.WriteLine();
-                            //}
-                            //-------
-
-                            Console.WriteLine();
-                            foreach (Deadlock dl in deadlock)
-                            {
-                               Console.WriteLine(dl.ToString());
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("No deadlock found");
-                        }
-                        break;
+                        missioni.Add(new MissioneTreno(missione.Trn, missione.ListaCdb));
                     }
-                default:
-                    PrintUsage();
-                    break;
+                    dati = TrovaAreeCritiche.GeneraStrutturaOutput(areeLineari, areeCircolari, missioni);
+
+                    //-----------------------
+                    //Identifico deadlock
+
+                    bool statoFinaleRaggiunto;
+                    List<Deadlock> deadlock;
+                    //Trovo la lista dei deadlock che possono verificarsi
+                    TrovaDeadlock.Trova(dati, out statoFinaleRaggiunto, out deadlock, options.IgnoraAree, options.IgnoraFalsiPositivi);
+
+                    Console.WriteLine("Identified Deadlocks:");
+                    if (deadlock.Count > 0)
+                    {
+                        //-------stampa in versione CVS
+                        //foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
+                        //{
+                        //    Console.Write(missione.Trn);
+                        //    Console.Write(",");
+                        //}
+                        //Console.WriteLine();
+                        //Console.WriteLine();
+
+                        //foreach (Deadlock dl in deadlock)
+                        //{
+                        //    foreach (MissioneAnnotata missione in dati.MissioniAnnotate)
+                        //    {
+                        //        int pos = dl.Getposition(missione.Trn);
+                        //        if (pos != -1)
+                        //            Console.Write(pos);
+                        //        Console.Write(",");
+                        //    }
+                        //    Console.WriteLine();
+                        //}
+                        //-------
+
+                        Console.WriteLine();
+                        foreach (Deadlock dl in deadlock)
+                        {
+                            Console.WriteLine(dl.ToString());
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No deadlock found");
+                    }
+                }
+                else if (options.Convert != null)
+                {
+                    string filename = options.Convert;
+                    if (!File.Exists(filename))
+                    {
+                        Console.WriteLine("File {0} does not exist", filename);
+                        return;
+                    }
+                    Convertitore.Converti(filename);
+                }
+                else if (options.Xml)
+                {
+                    ParserATS.Parse();
+                }
             }
 
             DateTime end = DateTime.Now;
@@ -182,7 +144,7 @@ namespace GestioneAreeCritiche
             TimeSpan elapsedTime = end - start;
 
             Console.WriteLine();
-            Console.WriteLine("Elapsed time: {0}s", elapsedTime.TotalSeconds);
+            Console.WriteLine("Elapsed time: {0} s", elapsedTime.TotalSeconds.ToString("0.###"));
             Console.WriteLine("Press any key to exit...");
             Console.Read();
         }

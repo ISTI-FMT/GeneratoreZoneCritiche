@@ -41,6 +41,11 @@ namespace GestioneAreeCritiche.ModelChecking
             return GetHashCode(Missioni);
         }
 
+        public int[] GetPosizioni()
+        {
+            return Missioni.Select(value => value.CurrentStep).ToArray();
+        }
+
         static int GetHashCode(List<StatoMissione> values)
         {
             List<int> steps = values.Select(value => value.CurrentStep).ToList();

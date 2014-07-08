@@ -90,7 +90,7 @@ namespace GestioneAreeCritiche.ParserConfigurazioneATS
                 Console.WriteLine("{0}: {1}", treno, string.Join(",", missioni[treno]));
             }
 
-            TrovaAreeCritiche.Trova(missioniList, "AreeCritiche");
+            TrovaAreeCritiche.Trova(missioniList, "AreeCritiche", false);
         }
 
         private static List<Stazione> CaricaStazioni(string sourcefile)
