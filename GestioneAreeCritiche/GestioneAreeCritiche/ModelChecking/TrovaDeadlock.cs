@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GestioneAreeCritiche.ModelChecking
 {
-    class Posizioni
+    class Posizioni// : IComparable<Posizioni>
     {
         private int[] posizioni;
         private int hashCode;
@@ -22,7 +22,6 @@ namespace GestioneAreeCritiche.ModelChecking
         public override bool Equals(object obj)
         {
             Posizioni stato2 = (Posizioni)obj;
-            //return posizioni.SequenceEqual(stato2.posizioni);
             return posizioni.SequenceEqual(stato2.posizioni);
         }
 
@@ -30,6 +29,22 @@ namespace GestioneAreeCritiche.ModelChecking
         {
             return hashCode;
         }
+
+        //public int CompareTo(Posizioni other)
+        //{
+        //    for (int i=0; i< posizioni.Length; i++)
+        //    {
+        //        int v = posizioni[i];
+        //        int v2 = other.posizioni[i];
+
+        //        int compare = v.CompareTo(v2);
+        //        if (compare != 0)
+        //        {
+        //            return compare;
+        //        }
+        //    }
+        //    return 0;
+        //}
     }
     class TrovaDeadlock
     {
@@ -275,6 +290,7 @@ namespace GestioneAreeCritiche.ModelChecking
                 List<IAreaCritica> aree = new List<IAreaCritica>();
                 TrovaDeadlock.Trova(statoTreni.Clone(), statoAree.Clone(), visitati, aree, out statoFinaleRaggiungibile, deadlockDaEvitare, deadlockTrovati, ignoraAree, ignoraFalsiPositivi);
 
+                Console.WriteLine();
                 Console.WriteLine("{1} new deadlocks found", contatoreIterazioni, deadlockTrovati.Count);
                 contatoreIterazioni++;
 

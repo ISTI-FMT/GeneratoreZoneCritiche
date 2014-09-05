@@ -5,6 +5,8 @@ using System.Text;
 
 namespace GestioneAreeCritiche.AreeCritiche
 {
+    public enum TipoArea { Lineare, Circolare }
+
     /// <summary>
     /// Interfaccia generica che rappresenta una area critica di qualsiasi tipo
     /// </summary>
@@ -13,6 +15,8 @@ namespace GestioneAreeCritiche.AreeCritiche
         List<int> ListaCdb { get; set; }
 
         int Limite { get; }
+
+        TipoArea TipoArea { get; }
 
         /// <summary>
         /// Genera la lista di cdb separati da virgola

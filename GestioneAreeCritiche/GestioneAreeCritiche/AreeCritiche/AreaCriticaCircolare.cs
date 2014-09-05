@@ -16,6 +16,8 @@ namespace GestioneAreeCritiche.AreeCritiche
         private List<int> _listaCdb;
         public List<int> ListaCdb { get { return _listaCdb; } set { _listaCdb = value; } }
 
+        public TipoArea TipoArea { get { return AreeCritiche.TipoArea.Circolare; } }
+
         public int Limite
         {
             get;

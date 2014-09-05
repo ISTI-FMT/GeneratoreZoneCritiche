@@ -9,7 +9,7 @@ using System.Text;
 
 namespace GestioneAreeCritiche.TrovaAree
 {
-    class TrovaAreeCritiche
+    public class TrovaAreeCritiche
     {
         private const int NessunaAzione = 0;
         private const int EntraSinistra = 3;
@@ -22,10 +22,53 @@ namespace GestioneAreeCritiche.TrovaAree
         private const int EntrataCircolare = 1;
         private const int UscitaCircolare = -1;
 
+        public static MissioneTreno CaricaMissione(string line)
+        {
+            MissioneTreno missione = null;
+            //Formato di una riga
+                    // nometreno = [ x,y,z ]
+                    if (string.IsNullOrEmpty(line) || line[0] == '#')
+                        return null;
+
+                    string[] tokens = line.Split('=');
+                    if (tokens.Length > 1)
+                    {
+                        string nometreno = tokens[0].Trim();
+
+                        string cdb = tokens[1].TrimStart(new[] { '[', ' ' });
+                        cdb = cdb.TrimEnd(new[] { ']', ' ' });
+                        cdb = cdb.Replace(" ", "");
+                        List<string> cdbList = cdb.Split(',').ToList();
+                        List<int> cdbListInt = cdbList.ConvertAll(Convert.ToInt32);
+
+                        missione = new MissioneTreno(nometreno, cdbListInt);
+
+                        Console.WriteLine("{0}= [{1}]", nometreno, cdb);
+                    }
+               return missione;
+        }
+
+        public static List<MissioneTreno> CaricaMissioni(string missioniFull)
+        {
+            List<MissioneTreno> missioni = new List<MissioneTreno>();
+
+            string[] missioniArr = missioniFull.Replace("\r","").Split(new[] { '\n' });
+
+            foreach (string line in missioniArr)
+            {
+                MissioneTreno missione = CaricaMissione(line);
+                if (missione != null)
+                {
+                    missioni.Add(missione);
+                }
+            }
+            return missioni;
+        }
+
         /// <summary>
         /// Ritorna una lista di missioni (lista di ID di CDB) a partire da un file di testo
         /// </summary>
-        private static List<MissioneTreno> CaricaMissioni(string nomefile)
+        public static List<MissioneTreno> CaricaFileMissioni(string nomefile)
         {
             List<MissioneTreno> missioni = new List<MissioneTreno>();
 
@@ -43,26 +86,12 @@ namespace GestioneAreeCritiche.TrovaAree
                 {
                     string line = sr.ReadLine();
 
-                    //Formato di una riga
-                    // nometreno = [ x,y,z ]
-                    if (string.IsNullOrEmpty(line) || line[0] == '#')
-                        continue;
-
-                    string[] tokens = line.Split('=');
-                    if (tokens.Length > 1)
+                    MissioneTreno missione = CaricaMissione(line);
+                    if (missione != null)
                     {
-                        string nometreno = tokens[0].Trim();
-
-                        string cdb = tokens[1].TrimStart(new[] { '[', ' ' });
-                        cdb = cdb.TrimEnd(new[] { ']', ' ' });
-                        cdb = cdb.Replace(" ", "");
-                        List<string> cdbList = cdb.Split(',').ToList();
-                        List<int> cdbListInt = cdbList.ConvertAll(Convert.ToInt32);
-
-                        missioni.Add(new MissioneTreno(nometreno, cdbListInt));
-
-                        Console.WriteLine("{0}= [{1}]", nometreno, cdb);
+                        missioni.Add(missione);
                     }
+                    
                 }
 
             }
@@ -211,7 +240,7 @@ namespace GestioneAreeCritiche.TrovaAree
             return res;
         }
 
-        internal static void Trova(List<MissioneTreno> missioni, string outFilename, bool ignoraFalsiPositivi)
+        public static DatiAree Trova(List<MissioneTreno> missioni, bool ignoraFalsiPositivi, bool trovaDeadlock)
         {
             //------- aree lineari
             List<AreaCriticaLineare> areeLineari = RicercaAreeLineari.Ricerca(missioni);
@@ -249,50 +278,57 @@ namespace GestioneAreeCritiche.TrovaAree
 
                 Console.WriteLine();
             }
-
-            Console.WriteLine("-------");
-            Console.WriteLine("Identifying Deadlocks....");
-            Console.WriteLine();
+            
             DatiAree output;
-
-
             output = GeneraStrutturaOutput(areeLineari, areeCircolari, missioni);
 
-            bool statoFinaleRaggiungibile;
-            List<Deadlock> deadlocks;
-            TrovaDeadlock.Trova(output, out statoFinaleRaggiungibile, out deadlocks, false, ignoraFalsiPositivi);
-            output.DeadlockConosciuti = deadlocks;
-            if (deadlocks.Count > 0)
+            if (trovaDeadlock)
             {
-                foreach (Deadlock dl in deadlocks)
+                Console.WriteLine("-------");
+                Console.WriteLine("Identifying Deadlocks....");
+                Console.WriteLine();
+
+                bool statoFinaleRaggiungibile;
+                List<Deadlock> deadlocks;
+                TrovaDeadlock.Trova(output, out statoFinaleRaggiungibile, out deadlocks, false, ignoraFalsiPositivi);
+                output.DeadlockConosciuti = deadlocks;
+                if (deadlocks.Count > 0)
                 {
-                    Console.WriteLine("Deadlock: " + dl.ToString());
+                    foreach (Deadlock dl in deadlocks)
+                    {
+                        Console.WriteLine("Deadlock: " + dl.ToString());
+                    }
                 }
+
             }
-
-
-            Console.WriteLine("-------");
-            Console.WriteLine("Generating Output....");
-
-            //Scrivo l'output sulla console
-            //GenerazioneOutput.ToConsoleOutput(output);
-
-            //Generazione output per UMC
-            string outfile = Path.GetFileNameWithoutExtension(outFilename) + ".umc";
-            Console.WriteLine("Generating {0}", outfile);
-            GenerazioneOutput.ToUmc(output, outfile);
-
-            //Generazione output XML
-            outfile = Path.GetFileNameWithoutExtension(outFilename) + ".xml";
-            Console.WriteLine("Generating {0}", outfile);
-            GenerazioneOutput.ToXml(output, outfile);
+            return output;
         }
 
         internal static void Trova(string nomefile, bool ignoraFalsiPositivi)
         {
-            List<MissioneTreno> missioni = CaricaMissioni(nomefile);
+            List<MissioneTreno> missioni = CaricaFileMissioni(nomefile);
 
-            Trova(missioni, nomefile, ignoraFalsiPositivi);
+            DatiAree output = Trova(missioni, ignoraFalsiPositivi, true);
+
+            GeneraOutput(output, nomefile);
         }
+
+        public static void GeneraOutput(DatiAree output, string nomefile)
+        {
+            Console.WriteLine("-------");
+            Console.WriteLine("Generating Output....");
+
+            //Generazione output per UMC
+            string outfile = Path.GetFileNameWithoutExtension(nomefile) + ".umc";
+            Console.WriteLine("Generating {0}", outfile);
+            GenerazioneOutput.ToUmc(output, outfile);
+
+            //Generazione output XML
+            outfile = Path.GetFileNameWithoutExtension(nomefile) + ".xml";
+            Console.WriteLine("Generating {0}", outfile);
+            GenerazioneOutput.ToXml(output, outfile);
+        }
+
+
     }
 }

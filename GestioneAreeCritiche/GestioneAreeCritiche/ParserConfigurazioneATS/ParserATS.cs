@@ -1,4 +1,5 @@
-﻿using GestioneAreeCritiche.TrovaAree;
+﻿using GestioneAreeCritiche.Output;
+using GestioneAreeCritiche.TrovaAree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,7 +91,8 @@ namespace GestioneAreeCritiche.ParserConfigurazioneATS
                 Console.WriteLine("{0}: {1}", treno, string.Join(",", missioni[treno]));
             }
 
-            TrovaAreeCritiche.Trova(missioniList, "AreeCritiche", false);
+            DatiAree output = TrovaAreeCritiche.Trova(missioniList, false, true);
+            TrovaAreeCritiche.GeneraOutput(output, "AreeCritiche");
         }
 
         private static List<Stazione> CaricaStazioni(string sourcefile)

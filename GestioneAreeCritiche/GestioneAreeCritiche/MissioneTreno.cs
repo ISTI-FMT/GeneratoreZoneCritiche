@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace GestioneAreeCritiche
 {
-    internal class MissioneTreno
+    public class MissioneTreno
     {
-        internal MissioneTreno(string nomeTreno, List<int> cdbList)
+        public MissioneTreno(string nomeTreno, List<int> cdbList)
         {
             NomeTreno = nomeTreno;
             CdbList = cdbList;
         }
 
-        internal string NomeTreno { get; private set; }
+        public string NomeTreno { get; private set; }
 
-        internal List<int> CdbList { get; private set; }
+        public List<int> CdbList { get; private set; }
 
-        internal List<int> Visitati { get; set; }
+        public List<int> Visitati { get; set; }
     }
 }

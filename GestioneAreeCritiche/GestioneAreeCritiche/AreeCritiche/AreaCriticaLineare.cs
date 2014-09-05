@@ -12,6 +12,8 @@ namespace GestioneAreeCritiche.AreeCritiche
             TreniDestra = new HashSet<string>();
         }
 
+        public TipoArea TipoArea { get { return AreeCritiche.TipoArea.Lineare; } }
+
         public int Limite { get { return 0; } }
 
         public List<int> ListaCdb { get; set; }
